@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>中文课 — 数字人老师 · HSK 3.0 课程</title>
+<style>
+/* ============================================================
+   中文课（教学端） — 数字人老师 + HSK 3.0 三等九级
+   视觉：冷静的教室（冷灰蓝 / 靛青），与剧场的暖黑金明确区分
+   学习内容的汉字用宋体，界面用黑体
+   ============================================================ */
+:root{
+  color-scheme: light;
+
+  --bg:#eef1f3;
+  --bg-2:#e4e9ec;
+  --surface:#ffffff;
+  --line:#d7dee2;
+  --line-soft:#e6ebee;
+
+  --ink:#141c22;
+  --ink-2:#3d4c55;
+  --ink-3:#6b7a83;
+  --ink-4:#9aa7ae;
+
+  --accent:#15607a;        /* 靛青：教学端 */
+  --accent-lit:#2a94b8;
+  --accent-soft:#e3eef2;
+
+  --pass:#2f6f52;
+  --warn:#8a6322;
+  --amber:#c0863a;         /* 全页唯一的暖色：通往剧场的门 */
+
+  --studio-1:#10191f;      /* 数字人影棚 */
+  --studio-2:#1b2a33;
+
+  --sans:"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans SC","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+  --song:"Songti SC","STSong","Source Han Serif SC","Noto Serif SC","Songti TC",Georgia,serif;
+
+  --ease:cubic-bezier(.17,.84,.3,1);
+  --r:5px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;
+}
+img{display:block;max-width:100%}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer;border:0;background:none}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent-lit);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.zh{font-family:var(--song)}
+
+/* ───────── 顶栏 ───────── */
+.top{
+  position:sticky;top:0;z-index:40;background:rgba(238,241,243,.92);
+  backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:16px;padding:0 24px;height:58px;
+}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.brand-mk{
+  width:28px;height:28px;flex:none;border-radius:4px;background:var(--accent);
+  color:#fff;font-family:var(--song);font-size:16px;display:grid;place-content:center;
+}
+.brand b{font-size:15.5px;font-weight:600;letter-spacing:.01em}
+.brand span{font-size:11.5px;color:var(--ink-3);display:block;line-height:1.3;margin-top:-2px}
+.top-sp{flex:1}
+.top-lv{
+  display:flex;align-items:center;gap:9px;padding-right:16px;border-right:1px solid var(--line);
+  font-size:12.5px;color:var(--ink-3);
+}
+.top-lv b{font-size:13.5px;color:var(--ink);font-weight:600}
+.tbtn{
+  border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12.5px;
+  color:var(--ink-2);background:var(--surface);transition:.16s var(--ease);white-space:nowrap;
+}
+.tbtn:hover{border-color:var(--ink-4);color:var(--ink)}
+a.tbtn{display:inline-block}
+.tbtn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+
+.wrap{max-width:1140px;margin:0 auto;padding:26px 24px 60px}
+
+/* ───────── 数字人老师 ───────── */
+.lead{display:grid;grid-template-columns:330px 1fr;gap:28px;align-items:start}
+
+.dh{position:sticky;top:84px}
+.dh-stage{
+  aspect-ratio:3/4;border-radius:var(--r);overflow:hidden;position:relative;
+  background:
+    radial-gradient(78% 56% at 36% 24%, rgba(42,148,184,.26), transparent 70%),
+    radial-gradient(120% 80% at 70% 108%, rgba(120,150,168,.16), transparent 62%),
+    linear-gradient(170deg,var(--studio-2),var(--studio-1) 72%);
+  box-shadow:0 20px 44px -28px rgba(20,28,34,.75);
+}
+.dh-stage img{width:100%;height:100%;object-fit:cover;object-position:50% 14%}
+.dh-stage.has-art .dh-figure,.dh-stage.has-art .dh-slot{display:none}
+.dh-stage.has-art .dh-state{background:rgba(8,14,18,.66)}
+.dh-stage:not(.has-art) img{display:none}
+.dh-figure{position:absolute;inset:0;width:100%;height:100%}
+.dh-stage::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(118% 84% at 50% 36%, transparent 52%, rgba(8,13,17,.6));
+}
+.dh-slot{
+  position:absolute;left:10px;top:10px;z-index:3;font-size:10.5px;color:rgba(214,232,240,.62);
+  border:1px solid rgba(214,232,240,.22);border-radius:3px;padding:2px 7px;letter-spacing:.02em;
+}
+.dh-state{
+  position:absolute;left:10px;bottom:10px;z-index:3;display:flex;align-items:center;gap:8px;
+  background:rgba(8,14,18,.52);border-radius:999px;padding:5px 12px 5px 9px;
+  font-size:11.5px;color:#cfe4ec;
+}
+.wave{display:flex;align-items:flex-end;gap:2px;height:13px}
+.wave i{width:2px;background:var(--accent-lit);border-radius:1px;height:4px}
+.dh-stage.speaking .wave i{animation:wv .9s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.1s}
+.wave i:nth-child(3){animation-delay:.22s}
+.wave i:nth-child(4){animation-delay:.33s}
+.wave i:nth-child(5){animation-delay:.16s}
+@keyframes wv{0%,100%{height:3px}50%{height:13px}}
+.dh-stage.listening .wave i{height:3px;background:#7f949f}
+
+.dh-say{
+  background:var(--surface);border:1px solid var(--line);border-top:0;
+  border-radius:0 0 var(--r) var(--r);margin-top:-5px;padding:16px 17px 14px;
+}
+.dh-who{font-size:11.5px;color:var(--ink-3);margin-bottom:6px}
+.dh-text{font-size:15px;line-height:1.66;color:var(--ink);margin:0;min-height:3.2em}
+.dh-text .k{color:var(--accent);font-weight:600}
+.dh-en{font-size:12.5px;color:var(--ink-3);line-height:1.5;margin:8px 0 0}
+.dh-ctl{display:flex;gap:8px;margin-top:13px;padding-top:12px;border-top:1px solid var(--line-soft)}
+.dh-ctl button{
+  font-size:12px;color:var(--ink-3);border:1px solid var(--line);border-radius:3px;padding:5px 10px;
+}
+.dh-ctl button:hover{color:var(--accent);border-color:var(--accent)}
+
+/* ───────── 卡片通用 ───────── */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px}
+.card + .card{margin-top:18px}
+.card-h{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+.card-h h2{font-size:15px;font-weight:600;margin:0;letter-spacing:.01em}
+.card-h .hint{font-size:12px;color:var(--ink-3);margin-left:auto}
+.card-sub{font-size:12.5px;color:var(--ink-3);margin:0 0 18px}
+
+/* ───────── 今日课 ───────── */
+.lesson-top{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.lesson-id{font-size:12.5px;color:var(--ink-3)}
+.lesson-id b{display:block;font-size:26px;color:var(--ink);font-weight:600;letter-spacing:-.01em;line-height:1.1}
+.lesson-meta{flex:1;min-width:200px;padding-top:3px}
+.lesson-unit{font-size:13px;color:var(--ink-2);display:flex;align-items:baseline;gap:10px}
+.lesson-dur{margin-left:auto;color:var(--ink-3);font-size:12px;white-space:nowrap}
+.lesson-goal{font-family:var(--song);font-size:21px;line-height:1.45;margin:4px 0 0;letter-spacing:.01em}
+.lesson-goal-en{font-size:12.5px;color:var(--ink-3);margin:5px 0 0}
+.syl{
+  display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--accent);
+  background:var(--accent-soft);border-radius:3px;padding:3px 9px;margin-top:9px;
+}
+
+.steps{border:1px solid var(--line-soft);border-radius:4px;overflow:hidden;margin-bottom:18px}
+.srow{display:flex;align-items:center;gap:14px;padding:11px 15px;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.srow:last-child{border-bottom:0}
+.srow-n{
+  width:20px;height:20px;flex:none;border-radius:50%;border:1px solid var(--line);
+  font-size:11px;color:var(--ink-3);display:grid;place-content:center;
+}
+.srow-t{font-weight:600;min-width:84px}
+.srow-d{color:var(--ink-3);font-size:12.5px;flex:1;min-width:0}
+.srow-c{color:var(--ink-2);font-size:12.5px;white-space:nowrap}
+.srow.quiz{background:#fafcfd}
+
+.words{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
+.word{
+  border:1px solid var(--line);border-radius:4px;padding:7px 11px 6px;background:#fcfdfe;
+  text-align:center;min-width:56px;
+}
+.word b{display:block;font-family:var(--song);font-size:19px;font-weight:400;line-height:1.2}
+.word span{display:block;font-size:10.5px;color:var(--ink-3);margin-top:2px}
+
+.act{display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+.btn{
+  background:var(--accent);color:#fff;border-radius:4px;padding:12px 24px;font-size:15px;
+  font-weight:600;letter-spacing:.02em;transition:.15s var(--ease);
+}
+.btn:hover{background:#114f64}
+.btn.ghost{background:none;color:var(--accent);border:1px solid var(--accent);font-weight:500}
+.btn.ghost:hover{background:var(--accent-soft)}
+.link{font-size:13px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+.link:hover{color:var(--accent);text-decoration-color:var(--accent)}
+
+/* ───────── 等级账本 ───────── */
+.ledger-top{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.lv-now{font-size:12.5px;color:var(--ink-3)}
+.lv-now b{font-size:21px;color:var(--ink);font-weight:600;display:block;line-height:1.2}
+.lv-arrow{color:var(--ink-4);font-size:17px;padding-bottom:3px}
+.lv-exam{margin-left:auto;text-align:right;font-size:12px;color:var(--ink-3);line-height:1.45}
+.lv-exam b{color:var(--warn);font-weight:600}
+
+.track{height:7px;border-radius:4px;background:var(--bg-2);overflow:hidden;display:flex;margin-bottom:6px}
+.track i{display:block;height:100%}
+.track i.done{background:var(--accent)}
+.track i.cur{background:var(--accent-lit)}
+.track-cap{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-4);margin-bottom:20px}
+
+.meters{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:4px;overflow:hidden}
+.meter{background:var(--surface);padding:14px 15px}
+.meter-t{font-size:11.5px;color:var(--ink-3);margin-bottom:5px}
+.meter-v{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.meter-v s{text-decoration:none;color:var(--ink-4);font-size:12.5px;font-weight:400}
+.meter-bar{height:3px;background:var(--bg-2);border-radius:2px;margin-top:8px;overflow:hidden}
+.meter-bar i{display:block;height:100%;background:var(--accent-lit);border-radius:2px}
+.meter.off .meter-v{color:var(--ink-4)}
+.std{font-size:11.5px;color:var(--ink-4);margin:12px 0 0;line-height:1.5}
+.std button{color:var(--accent);text-decoration:underline;text-underline-offset:2px;font-size:11.5px}
+
+/* ───────── 分级依据 ───────── */
+.why-list{list-style:none;margin:0;padding:0}
+.why-list li{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px;line-height:1.55}
+.why-list li:last-child{border-bottom:0}
+.why-list .q{flex:none;width:76px;color:var(--ink-3);font-size:12.5px}
+.why-list .a{flex:1;min-width:0}
+.why-list .a em{font-style:normal;color:var(--accent);font-weight:600}
+.recheck{font-size:12.5px;color:var(--ink-3);margin:14px 0 0;padding-top:13px;border-top:1px solid var(--line-soft)}
+
+/* ───────── 课程表 ───────── */
+.units{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:4px;overflow:hidden}
+.unit{background:var(--surface);padding:13px 15px;display:flex;gap:12px;align-items:flex-start}
+.unit.is-now{background:var(--accent-soft)}
+.unit-n{font-size:11.5px;color:var(--ink-4);flex:none;width:52px;padding-top:2px}
+.unit-b{flex:1;min-width:0}
+.unit-t{font-size:13.5px;font-weight:600}
+.unit-d{font-size:12px;color:var(--ink-3);margin-top:1px;line-height:1.45}
+.unit-s{flex:none;font-size:11px;padding-top:3px}
+.unit-s.done{color:var(--pass)}
+.unit-s.now{color:var(--accent);font-weight:600}
+.unit-s.soon{color:var(--ink-4)}
+
+/* ───────── 课后实践（通往剧场） ───────── */
+.practice{
+  margin-top:18px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface);
+}
+.practice-h{padding:16px 24px 0}
+.practice-h h2{font-size:15px;font-weight:600;margin:0 0 3px}
+.practice-h p{font-size:12.5px;color:var(--ink-3);margin:0 0 16px;max-width:66ch;line-height:1.55}
+.gate{
+  margin:0 16px 16px;border-radius:4px;background:linear-gradient(104deg,#171310,#241c14 62%,#2e2317);
+  color:#e8dccb;padding:18px 20px;display:flex;align-items:center;gap:18px;position:relative;overflow:hidden;
+}
+.gate::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(380px 130px at 88% 128%, rgba(192,134,58,.26), transparent 70%);
+}
+.gate-i{
+  width:36px;height:36px;flex:none;border:1px solid rgba(192,134,58,.42);border-radius:50%;
+  display:grid;place-content:center;color:#a8793a;position:relative;z-index:1;
+}
+.gate-i svg{width:17px;height:17px}
+.gate-b{flex:1;min-width:0;position:relative;z-index:1}
+.gate-t{font-size:14.5px;color:#f1e6d5;font-weight:600}
+.gate-d{font-size:12.5px;color:#a2968a;margin-top:3px;line-height:1.5}
+.gate-a{position:relative;z-index:1}
+.gate.open{background:linear-gradient(104deg,#1c1711,#2e2317 58%,#3d2d1b)}
+.gate.open .gate-i{border-color:var(--amber);color:var(--amber);box-shadow:0 0 20px -5px rgba(192,134,58,.6)}
+.gate.open .gate-d{color:#c2b299}
+.btn-amber{
+  background:var(--amber);color:#1b1206;border-radius:4px;padding:10px 20px;font-size:14px;
+  font-weight:600;text-decoration:none;display:inline-block;
+}
+.btn-amber:hover{background:#d0934a}
+.gate-note{font-size:11.5px;color:#8a7f73;padding:0 20px 16px;position:relative;z-index:1}
+
+.foot{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-4);line-height:1.7}
+.foot a{color:var(--ink-3)}
+
+/* ───────── 分级面谈 ───────── */
+.intake{min-height:100vh;display:flex;flex-direction:column}
+.in-top{height:58px;display:flex;align-items:center;gap:16px;padding:0 24px;border-bottom:1px solid var(--line)}
+.in-prog{display:flex;gap:5px;width:132px}
+.in-prog i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.in-prog i.on{background:var(--accent)}
+.in-body{flex:1;display:flex;justify-content:center;padding:clamp(26px,6vh,56px) 24px 70px}
+.in-grid{display:grid;grid-template-columns:300px 1fr;gap:38px;max-width:1040px;width:100%;align-items:start}
+.in-main{min-width:0;padding-top:4px}
+.in-kick{font-size:12px;color:var(--ink-3);letter-spacing:.06em;margin-bottom:10px}
+.in-q{font-size:clamp(23px,3vw,31px);line-height:1.4;margin:0;font-weight:600;letter-spacing:.005em;max-width:22ch}
+.in-q-en{font-size:13.5px;color:var(--ink-3);margin:10px 0 0;max-width:56ch;line-height:1.6}
+
+.opts{margin-top:26px;display:flex;flex-direction:column;gap:8px;max-width:620px}
+.opt{
+  text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:4px;
+  padding:14px 17px;display:flex;align-items:center;gap:14px;transition:.14s var(--ease);
+}
+.opt:hover{border-color:var(--accent);background:#fbfdfe}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt-k{
+  width:22px;height:22px;flex:none;border-radius:3px;border:1px solid var(--line);
+  font-size:11px;color:var(--ink-4);display:grid;place-content:center;
+}
+.opt:hover .opt-k,.opt.sel .opt-k{border-color:var(--accent);color:var(--accent)}
+.opt-b{flex:1;min-width:0;display:block}
+.opt-t{display:block;font-size:15px;font-weight:600;line-height:1.4}
+.opt-d{display:block;font-size:12.5px;color:var(--ink-3);margin-top:2px;line-height:1.45}
+.opt-x{flex:none;font-size:12px;color:var(--ink-4)}
+
+.probe{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:20px 22px;max-width:620px;margin-top:24px}
+.probe-q{font-size:13px;color:var(--ink-3);margin:0 0 13px}
+.audio{
+  display:flex;align-items:center;gap:13px;background:var(--studio-1);border-radius:4px;
+  padding:13px 16px;color:#d4e3ea;margin-bottom:16px;
+}
+.audio button{
+  width:32px;height:32px;flex:none;border-radius:50%;background:var(--accent-lit);color:#06181f;
+  display:grid;place-content:center;
+}
+.audio svg{width:14px;height:14px}
+.audio .zh{font-family:var(--song);font-size:18px;letter-spacing:.04em}
+.audio small{display:block;font-size:11px;color:#8ba3ad;letter-spacing:.02em;margin-top:1px}
+.glyphs{display:flex;flex-wrap:wrap;gap:8px}
+.glyph{
+  border:1px solid var(--line);border-radius:4px;padding:10px 0 8px;width:62px;text-align:center;
+  transition:.14s var(--ease);
+}
+.glyph b{display:block;font-family:var(--song);font-size:25px;font-weight:400;line-height:1}
+.glyph span{display:block;font-size:10px;color:var(--ink-4);margin-top:4px}
+.glyph.on{border-color:var(--accent);background:var(--accent-soft)}
+.glyph.on span{color:var(--accent)}
+.in-nav{margin-top:24px;display:flex;align-items:center;gap:16px}
+
+/* 判定屏 */
+.verdict{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;max-width:700px}
+.v-head{background:var(--accent);color:#fff;padding:20px 24px}
+.v-head .t{font-size:12.5px;opacity:.82}
+.v-head .lv{font-size:30px;font-weight:600;letter-spacing:-.01em;margin-top:2px}
+.v-head .lv s{text-decoration:none;font-size:15px;font-weight:400;opacity:.8;margin-left:8px}
+.v-head .sub{font-size:13px;opacity:.9;margin-top:6px;line-height:1.55}
+.v-body{padding:20px 24px}
+.v-why{list-style:none;margin:0 0 18px;padding:0}
+.v-why li{display:flex;gap:11px;padding:8px 0;font-size:13.5px;line-height:1.55;border-bottom:1px solid var(--line-soft)}
+.v-why li:last-child{border-bottom:0}
+.v-why .n{flex:none;width:17px;color:var(--accent);font-weight:600;font-size:12.5px;padding-top:1px}
+.v-why em{font-style:normal;font-weight:600}
+.v-plan{background:#f8fafb;border:1px solid var(--line-soft);border-radius:4px;padding:15px 17px;margin-bottom:16px}
+.v-plan-r{display:flex;justify-content:space-between;gap:14px;font-size:13.5px;padding:5px 0}
+.v-plan-r span{color:var(--ink-3)}
+.v-plan-r b{font-weight:600}
+.v-exam{border-left:3px solid var(--warn);background:#fdfaf3;padding:13px 15px;border-radius:0 4px 4px 0;font-size:13.5px;line-height:1.6}
+.v-exam b{color:var(--warn)}
+
+/* ───────── 选老师 ───────── */
+.pickd{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:34px 24px}
+.pickd-in{display:grid;grid-template-columns:340px 1fr;gap:40px;max-width:1040px;width:100%;align-items:center}
+.pickd-hero{aspect-ratio:3/4;border-radius:var(--r);overflow:hidden;position:relative;background:var(--studio-1);
+  box-shadow:0 26px 60px -30px rgba(20,28,34,.75)}
+.pickd-hero img{width:100%;height:100%;object-fit:cover;object-position:50% 12%}
+.pickd-kind{position:absolute;left:12px;top:12px;background:rgba(10,16,20,.55);color:#dbe8ee;border-radius:999px;
+  padding:4px 10px;font-size:10.5px;font-weight:600;letter-spacing:.02em}
+.pickd-b{min-width:0}
+.pickd-k{font-size:12px;color:var(--ink-3);letter-spacing:.06em;margin-bottom:8px}
+.pickd-name{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap}
+.pickd-name b{font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.pickd-name .nat{font-size:19px;opacity:.7}
+.pickd-name i{font-style:normal;font-size:14px;color:var(--ink-3)}
+.pickd-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:13px 0 0}
+.pickd-stu{margin-left:auto;font-size:13px;color:var(--ink-3)}
+.pickd-stu b{color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums}
+.pickd-intro{font-size:15px;line-height:1.7;color:var(--ink-2);margin:15px 0 0;max-width:56ch}
+.pickd-strip{display:flex;gap:10px;margin:22px 0 0;overflow-x:auto;padding-bottom:4px}
+.pickd-th{flex:none;width:74px;height:96px;border-radius:4px;overflow:hidden;position:relative;background:var(--bg-2);
+  box-shadow:0 6px 16px -8px rgba(20,28,34,.5);transition:.15s var(--ease)}
+.pickd-th img{width:100%;height:100%;object-fit:cover;object-position:50% 12%}
+.pickd-th:hover{transform:translateY(-2px)}
+.pickd-th.on{outline:2.5px solid var(--accent);outline-offset:-1px}
+.pickd-th.on::after{content:'✓';position:absolute;left:4px;top:3px;width:17px;height:17px;border-radius:3px;
+  background:var(--accent);color:#fff;font-size:10px;display:grid;place-items:center}
+@media (max-width:820px){ .pickd-in{grid-template-columns:1fr;gap:22px} .pickd-hero{max-width:300px;margin:0 auto} }
+
+/* ───────── 课堂（全屏讲解 + 练习） ───────── */
+.room{position:fixed;inset:0;z-index:90;background:#0b1116;color:#e9f0f4;display:none;flex-direction:column}
+.room.on{display:flex}
+.room-bg{position:absolute;inset:0;overflow:hidden}
+.room-bg img{width:100%;height:100%;object-fit:cover;object-position:64% 17%}
+.room-scrim{position:absolute;inset:0;transition:.4s var(--ease);
+  background:linear-gradient(100deg,rgba(9,14,19,.93) 24%,rgba(9,14,19,.62) 52%,rgba(9,14,19,.3) 78%),
+             radial-gradient(120% 90% at 50% 112%,rgba(9,14,19,.9),transparent 62%)}
+.room[data-mode="work"] .room-scrim{background:rgba(9,14,19,.9)}
+.room-top{position:relative;z-index:3;height:58px;display:flex;align-items:center;gap:14px;padding:0 24px;border-bottom:1px solid rgba(233,240,244,.1)}
+.room-x{width:32px;height:32px;border-radius:8px;background:rgba(233,240,244,.1);display:grid;place-items:center;flex:none}
+.room-x svg{width:16px;height:16px}
+.room-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(42,148,184,.2);border:1px solid rgba(42,148,184,.4);
+  color:#9fd8ec;border-radius:999px;padding:5px 13px;font-size:12px;font-weight:600;white-space:nowrap}
+.room-tag svg{width:14px;height:14px}
+.room-ttl{font-size:13px;color:#93a8b4}
+.room-bar{display:flex;gap:4px;width:220px;margin-left:auto}
+.room-bar i{flex:1;height:4px;border-radius:2px;background:rgba(233,240,244,.16)}
+.room-bar i.on{background:var(--accent-lit)}
+.room-bar i.now{background:#fff}
+.room-min{font-size:12px;color:#93a8b4;font-variant-numeric:tabular-nums}
+.room-main{position:relative;z-index:3;flex:1;min-height:0;display:flex;align-items:center;gap:34px;padding:28px 44px;overflow-y:auto}
+.room-foot{position:relative;z-index:3;padding:0 44px 26px}
+.room-cap{max-width:52ch}
+.room-say{font-size:clamp(18px,1.7vw,23px);line-height:1.6;font-weight:600;margin:0;letter-spacing:-.005em}
+.room-en{font-size:13.5px;color:#90a4b0;margin:10px 0 0;line-height:1.55;max-width:62ch}
+.room-ctl{display:flex;gap:9px;margin-top:20px}
+.room-ctl button{border:1px solid rgba(233,240,244,.18);background:rgba(233,240,244,.07);color:#e9f0f4;
+  border-radius:5px;padding:9px 15px;font-size:12.5px;display:inline-flex;align-items:center;gap:7px;transition:.15s var(--ease)}
+.room-ctl button:hover{background:rgba(233,240,244,.15)}
+.room-ctl button.lit{background:var(--accent);border-color:var(--accent)}
+.room-ctl button:disabled{opacity:.35;cursor:not-allowed}
+.room-ctl svg{width:15px;height:15px}
+.room-board{flex:0 1 560px;min-width:0}
+.room-chk{flex:0 1 420px;background:var(--surface);color:var(--ink);border-radius:6px;padding:22px 24px;box-shadow:0 28px 64px -24px rgba(0,0,0,.7)}
+.room-chk .k{font-size:11px;letter-spacing:.1em;color:var(--accent);font-weight:600;margin-bottom:7px}
+.room-chk h3{font-size:17px;font-weight:600;margin:0 0 15px;line-height:1.45}
+.room-work{flex:1;display:flex;justify-content:center}
+.room-card{background:var(--surface);color:var(--ink);border-radius:6px;padding:26px 28px;max-width:640px;width:100%;box-shadow:0 30px 70px -26px rgba(0,0,0,.75)}
+.room-card .eyebrow{font-size:11.5px;color:var(--accent);font-weight:600;letter-spacing:.04em}
+.room-card h2{font-size:21px;font-weight:600;margin:6px 0 4px;letter-spacing:-.01em}
+.eyebrow{font-size:11.5px;color:var(--accent);font-weight:600;letter-spacing:.04em}
+.qopt{width:100%;text-align:left;background:#f6f8f9;border-radius:5px;padding:13px 15px;margin-bottom:8px;
+  display:flex;align-items:center;gap:12px;font-size:14.5px;line-height:1.45;transition:.14s var(--ease)}
+.qopt:hover{background:#eaf1f4}
+.qopt .k{width:22px;height:22px;flex:none;border-radius:4px;background:#fff;color:var(--ink-3);
+  font-size:11.5px;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.qopt.ok{background:#e6f0ea;color:var(--pass)}
+.qopt.ok .k{background:var(--pass);color:#fff}
+.qopt.no{background:#f6e9e4;color:#9a5a3a}
+.qopt.no .k{background:#9a5a3a;color:#fff}
+.qopt.dim{opacity:.45}
+.fb{border-radius:5px;padding:13px 15px;font-size:13px;line-height:1.6;margin-top:10px}
+.fb.ok{background:#e6f0ea;color:var(--pass)}
+.fb.no{background:#f6e9e4;color:#9a5a3a}
+.btn.rec{background:var(--warn);box-shadow:0 0 0 8px rgba(138,99,34,.18)}
+
+/* 板书（教学端配色） */
+.bd{background:var(--surface);color:var(--ink);border-radius:6px;padding:22px 24px;
+  box-shadow:0 26px 60px -22px rgba(0,0,0,.72);animation:bdIn .34s var(--ease) both}
+@keyframes bdIn{from{opacity:0;transform:translateY(10px)}}
+.bd-note{font-size:12.5px;color:var(--ink-3);margin-top:15px;padding-top:12px;border-top:1px dashed var(--line);line-height:1.55}
+.bd-item,.bd-kvr,.bd-group,.bd-cell,.bd-r,.bd-ts{animation:itIn .36s var(--ease) both;animation-delay:var(--d,0ms)}
+@keyframes itIn{from{opacity:0;transform:translateY(7px)}}
+.bd-list{display:flex;flex-direction:column;gap:12px}
+.bd-item b{font-family:var(--song);font-size:24px;font-weight:400;display:block;line-height:1.3}
+.bd-item span{font-size:12.5px;color:var(--ink-3);display:block;margin-top:2px}
+.bd-kv{display:flex;flex-direction:column;gap:9px}
+.bd-kvr{display:flex;justify-content:space-between;gap:16px;font-size:14px}
+.bd-kvr span{color:var(--ink-3)}
+.bd-kvr b{font-weight:600}
+.bd-line{text-align:center}
+.bd-z{font-family:var(--song);font-size:clamp(26px,2.6vw,38px);line-height:1.45}
+.bd-z em{font-style:normal;color:var(--accent);box-shadow:inset 0 -10px 0 var(--accent-soft)}
+.bd-py{font-size:15px;color:var(--accent);font-weight:600;margin-top:9px}
+.bd-en{font-size:13px;color:var(--ink-3);margin-top:5px}
+.bd-groups{display:flex;flex-direction:column;gap:13px}
+.bd-group.hi{background:var(--accent-soft);margin:0 -10px;padding:10px;border-radius:5px}
+.bd-gt{font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;margin-bottom:7px}
+.bd-group.hi .bd-gt{color:var(--accent)}
+.bd-gi{display:flex;flex-wrap:wrap;gap:8px}
+.bd-w{background:#f6f8f9;border-radius:4px;padding:8px 11px 7px;text-align:center;min-width:50px}
+.bd-group.hi .bd-w{background:#fff}
+.bd-w b{display:block;font-family:var(--song);font-size:20px;font-weight:400;line-height:1.15}
+.bd-w i{display:block;font-style:normal;font-size:10.5px;color:var(--ink-3);margin-top:2px}
+.bd-slot{display:flex;gap:9px;justify-content:center;align-items:center;flex-wrap:wrap}
+.bd-cell{font-family:var(--song);font-size:30px;padding:11px 15px;border-radius:5px;background:#f6f8f9;min-width:56px;text-align:center;line-height:1.2}
+.bd-cell.slot{border:2.5px dashed var(--accent);background:#fff;color:var(--accent);min-height:60px;display:grid;place-items:center}
+.bd-cell.slot.fill{border-style:solid;background:var(--accent);color:#fff}
+.bd-rows{display:flex;flex-direction:column;gap:13px}
+.bd-r{display:flex;gap:13px;align-items:flex-start}
+.bd-mark{flex:none;width:24px;height:24px;border-radius:4px;display:grid;place-items:center;font-size:13px;font-weight:600;margin-top:3px}
+.bd-r.good .bd-mark{background:#e6f0ea;color:var(--pass)}
+.bd-r.bad .bd-mark{background:#f6e9e4;color:#9a5a3a}
+.bd-r.neu .bd-mark{background:var(--accent-soft);color:var(--accent)}
+.bd-rz{font-family:var(--song);font-size:23px;line-height:1.4;flex:1;min-width:0}
+.bd-r.bad .bd-rz{text-decoration:line-through;text-decoration-color:rgba(154,90,58,.5);color:#8d8a84}
+.bd-rz i{display:block;font-style:normal;font-family:var(--sans);font-size:12.5px;color:var(--ink-3);margin-top:5px;text-decoration:none}
+.bd-tone{display:flex;gap:22px;justify-content:center}
+.bd-ts{text-align:center;color:var(--accent)}
+.bd-tc{width:62px;height:42px;display:block;margin:0 auto}
+.bd-ts b{display:block;font-size:19px;font-weight:600;margin-top:2px}
+.bd-ts i{display:block;font-style:normal;font-family:var(--song);font-size:26px;color:var(--ink);line-height:1.25}
+.bd-ts u{display:block;text-decoration:none;font-size:11px;color:var(--ink-3);margin-top:3px}
+.bd-ts.morph{animation:morphIn .55s var(--ease) both}
+@keyframes morphIn{from{opacity:0;transform:scale(.8)}}
+
+@media (max-width:860px){
+  .room-main{flex-direction:column;align-items:stretch;padding:20px 18px;gap:18px}
+  .room-foot{padding:0 18px 18px}
+  .room-top{padding:0 14px;gap:10px}
+  .room-bar{width:120px}
+  .room-ttl{display:none}
+  .room-ctl{flex-wrap:wrap}
+}
+
+/* ───────── 浮层 ───────── */
+.modal{position:fixed;inset:0;z-index:60;background:rgba(20,28,34,.42);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:.2s var(--ease)}
+.modal.on{opacity:1;pointer-events:auto}
+.modal-c{background:var(--surface);border-radius:var(--r);max-width:580px;width:100%;max-height:84vh;overflow-y:auto;padding:24px 26px;box-shadow:0 30px 70px -36px rgba(20,28,34,.7)}
+.modal-c h3{font-size:17px;margin:0 0 4px;font-weight:600}
+.modal-c p{font-size:13.5px;line-height:1.65;color:var(--ink-2)}
+.modal-c table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+.modal-c th,.modal-c td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--line-soft)}
+.modal-c th:first-child,.modal-c td:first-child{text-align:left}
+.modal-c th{font-size:11.5px;color:var(--ink-3);font-weight:500}
+.modal-c tr.cur td{background:var(--accent-soft);font-weight:600}
+.modal-x{float:right;font-size:20px;color:var(--ink-3);line-height:1;padding:2px 6px;margin:-4px -6px 0 0}
+
+.demo{position:fixed;right:18px;bottom:18px;z-index:70;background:var(--ink);color:#e8edf0;border-radius:5px;padding:14px 16px;width:248px;box-shadow:0 22px 48px -24px rgba(20,28,34,.85);font-size:12.5px;display:none}
+.demo.on{display:block}
+.demo h4{font-size:13px;margin:0 0 3px;font-weight:600}
+.demo p{color:#93a3ac;font-size:11px;margin:0 0 12px;line-height:1.5}
+.demo button{display:block;width:100%;text-align:left;border:1px solid rgba(232,237,240,.16);border-radius:3px;padding:7px 10px;margin-bottom:6px;color:#e8edf0}
+.demo button:hover{background:rgba(232,237,240,.1)}
+.demo button.warn{color:#e8b6a6;border-color:rgba(232,182,166,.26)}
+.demo-x{position:absolute;right:8px;top:7px;color:#93a3ac;font-size:16px;width:auto!important;border:0!important;margin:0!important;padding:2px 5px!important}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,12px);z-index:80;background:var(--ink);color:#fff;border-radius:4px;padding:11px 20px;font-size:14px;opacity:0;pointer-events:none;transition:.2s var(--ease);max-width:84vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ───────── 窄屏 ───────── */
+@media (max-width:940px){
+  .lead{grid-template-columns:1fr;gap:20px}
+  .dh{position:static}
+  .dh-stage{aspect-ratio:16/9}
+  .in-grid{grid-template-columns:1fr;gap:24px}
+  .meters{grid-template-columns:repeat(2,1fr)}
+  .units{grid-template-columns:1fr}
+}
+@media (max-width:620px){
+  .top{padding:0 15px;gap:10px}
+  .brand span,.top-lv{display:none}
+  .wrap{padding:18px 15px 50px}
+  .card{padding:18px 16px}
+  .gate{flex-wrap:wrap;margin:0 12px 12px}
+  .gate-a{width:100%;padding-left:54px}
+  .lesson-goal{font-size:19px}
+  .demo{right:10px;bottom:10px;width:calc(100% - 20px)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+<div id="room"></div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="modal-c" id="modalC"></div></div>
+
+<div class="demo" id="demo">
+  <button class="demo-x" id="demoX" aria-label="关闭">×</button>
+  <h4>原型演示</h4>
+  <p>本轮做的是分级面谈与教学端首页。课时内部还没做。</p>
+  <button id="dDone">假装今天这节课上完了</button>
+  <button id="dL6">跳到第 6 课</button>
+  <button id="dL33">跳到第 33 课</button>
+  <button id="dStage">直通剧场（评审）</button>
+  <button class="warn" id="dReset">清空并重新评估</button>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<div class="sr" aria-live="polite" id="live"></div>
+
+<script src="lesson-core.js"></script>
+<script>
+/* ============================================================
+   1. HSK 3.0（三等九级）数据
+      口径：2025 年 HSK 考试大纲。注意不是 2021 年《标准》
+      （《标准》一级为 500 词，考试大纲一级为 300 词，二者常被混用）
+   ============================================================ */
+const HSK = [
+  { lv:1, words:300,   read:246,  write:0,    lessons:40,  use:{ zh:'应付最基本的日常交际', en:'Handle the most basic daily exchanges' } },
+  { lv:2, words:500,   read:371,  write:100,  lessons:30,  use:{ zh:'处理简单的生活与工作事务', en:'Manage simple daily and work matters' } },
+  { lv:3, words:1000,  read:655,  write:250,  lessons:65,  use:{ zh:'在中文环境里独立生活', en:'Live independently in a Chinese-speaking environment' } },
+  { lv:4, words:2000,  read:1096, write:400,  lessons:120, use:{ zh:'用中文工作、读懂一般文件', en:'Work in Chinese and read ordinary documents' } },
+  { lv:5, words:3600,  read:1527, write:550,  lessons:185, use:{ zh:'进入中文授课的专业学习', en:'Enter degree study taught in Chinese' } },
+  { lv:6, words:5400,  read:1940, write:700,  lessons:215, use:{ zh:'胜任专业场合的表达', en:'Hold your own in professional settings' } }
+];
+const EXAM = { date:'2026-12-13', label:{ zh:'HSK 3.0 首场考试', en:'First HSK 3.0 sitting' } };
+
+/* HSK 1 课程表：六个单元，四十课 */
+const UNITS = [
+  { n:1, from:1,  to:7,  zh:'见面与问候',     en:'Meeting and greeting',      d:{ zh:'打招呼、说名字、道谢与告别', en:'Greet, give your name, thank, part' } },
+  { n:2, from:8,  to:14, zh:'我和我的家人',   en:'Me and my family',          d:{ zh:'介绍自己、家人、国籍与职业', en:'Introduce yourself, family, nationality, job' } },
+  { n:3, from:15, to:21, zh:'数字、时间与约定', en:'Numbers, time, arrangements', d:{ zh:'说数字与时间，和人约一个时间', en:'Say numbers and times, arrange to meet' } },
+  { n:4, from:22, to:28, zh:'吃饭与买东西',   en:'Eating and shopping',       d:{ zh:'点餐、问价、说要与不要', en:'Order, ask prices, say what you want' } },
+  { n:5, from:29, to:34, zh:'地方、方向与出行', en:'Places and getting around', d:{ zh:'问路、说位置、坐车', en:'Ask the way, say where things are, take transport' } },
+  { n:6, from:35, to:40, zh:'一天的安排',     en:'Your day',                  d:{ zh:'说日程、天气与简单的打算', en:'Talk about your day, the weather, simple plans' } }
+];
+
+/* 每个单元一节样课。原型里按当前课号落到所在单元，
+   正式版每课都有自己的内容，由老师按掌握度现排 */
+const SAMPLES = {
+  1:{ goal:{ zh:'能说出自己的名字，并问别人叫什么', en:'Give your own name and ask someone else’s' },
+      syllabus:{ zh:'HSK 1 · 话题「姓名」；疑问代词「什么」', en:'HSK 1 · topic “names”; the question word 什么' },
+      words:[{z:'你',p:'nǐ'},{z:'好',p:'hǎo'},{z:'我',p:'wǒ'},{z:'叫',p:'jiào'},
+             {z:'什么',p:'shénme'},{z:'名字',p:'míngzi'},{z:'谢谢',p:'xièxie'},{z:'再见',p:'zàijiàn'}],
+      grammar:[{ zh:'「叫」后面直接跟名字：我叫李明。', en:'叫 is followed directly by the name: 我叫李明。'},
+               { zh:'用「什么」问事物：你叫什么名字？', en:'什么 asks about a thing: 你叫什么名字？'}] },
+  2:{ goal:{ zh:'能说清你是哪国人、做什么的、家里有谁', en:'Say where you are from, what you do, and who is in your family' },
+      syllabus:{ zh:'HSK 1 · 话题「个人信息」；「是」字句与「有」', en:'HSK 1 · topic “personal information”; 是 sentences and 有' },
+      words:[{z:'是',p:'shì'},{z:'人',p:'rén'},{z:'中国',p:'Zhōngguó'},{z:'家',p:'jiā'},
+             {z:'爸爸',p:'bàba'},{z:'妈妈',p:'māma'},{z:'有',p:'yǒu'},{z:'很',p:'hěn'}],
+      grammar:[{ zh:'「是」字句表身份：我是老师。', en:'是 states identity: 我是老师。'},
+               { zh:'「有」表拥有：我家有三个人。', en:'有 expresses possession: 我家有三个人。'}] },
+  3:{ goal:{ zh:'能问时间、说出时间，并和人约一个时间', en:'Ask the time, tell the time, and arrange to meet someone' },
+      syllabus:{ zh:'HSK 1 · 话题「时间」；疑问代词「几」', en:'HSK 1 · topic “time”; the question word 几' },
+      words:[{z:'点',p:'diǎn'},{z:'分',p:'fēn'},{z:'几',p:'jǐ'},{z:'现在',p:'xiànzài'},
+             {z:'今天',p:'jīntiān'},{z:'明天',p:'míngtiān'},{z:'星期',p:'xīngqī'},{z:'号',p:'hào'}],
+      grammar:[{ zh:'用「几」问数目和时间：现在几点？', en:'几 asks for a number or a time: 现在几点？'},
+               { zh:'时间词直接作谓语，不用「是」：现在三点。', en:'A time word can be the predicate on its own, with no 是: 现在三点。'}] },
+  4:{ goal:{ zh:'能点一样吃的、问清价钱并付钱', en:'Order something to eat, ask the price, and pay' },
+      syllabus:{ zh:'HSK 1 · 话题「餐饮与购物」；量词「个」', en:'HSK 1 · topic “eating and shopping”; the measure word 个' },
+      words:[{z:'要',p:'yào'},{z:'这',p:'zhè'},{z:'个',p:'ge'},{z:'多少',p:'duōshao'},
+             {z:'钱',p:'qián'},{z:'块',p:'kuài'},{z:'买',p:'mǎi'},{z:'太',p:'tài'}],
+      grammar:[{ zh:'「多少钱」问价：这个多少钱？', en:'多少钱 asks a price: 这个多少钱？'},
+               { zh:'数词和名词之间要加量词：一个包子。', en:'A measure word goes between number and noun: 一个包子。'}] },
+  5:{ goal:{ zh:'能问路，并听懂简单的方向', en:'Ask the way and follow simple directions' },
+      syllabus:{ zh:'HSK 1 · 话题「方位与出行」；疑问代词「哪儿」', en:'HSK 1 · topic “places and travel”; the question word 哪儿' },
+      words:[{z:'在',p:'zài'},{z:'哪儿',p:'nǎr'},{z:'里',p:'lǐ'},{z:'前面',p:'qiánmiàn'},
+             {z:'左边',p:'zuǒbiān'},{z:'右边',p:'yòubiān'},{z:'走',p:'zǒu'},{z:'坐',p:'zuò'}],
+      grammar:[{ zh:'「在」表示位置：医院在前面。', en:'在 marks location: 医院在前面。'},
+               { zh:'用「哪儿」问地方：你在哪儿？', en:'哪儿 asks about a place: 你在哪儿？'}] },
+  6:{ goal:{ zh:'能说出一天的安排和天气', en:'Talk about your day and the weather' },
+      syllabus:{ zh:'HSK 1 · 话题「日常与天气」；能愿动词「想」「会」', en:'HSK 1 · topic “daily life and weather”; the modals 想 and 会' },
+      words:[{z:'天气',p:'tiānqì'},{z:'热',p:'rè'},{z:'冷',p:'lěng'},{z:'下午',p:'xiàwǔ'},
+             {z:'去',p:'qù'},{z:'看',p:'kàn'},{z:'想',p:'xiǎng'},{z:'会',p:'huì'}],
+      grammar:[{ zh:'「想」表示打算：我想去看看。', en:'想 expresses an intention: 我想去看看。'},
+               { zh:'「会」表示学会了做某事：我会说一点中文。', en:'会 marks an acquired ability: 我会说一点中文。'}] }
+};
+function lessonOf(n){
+  const u = UNITS.find(x=>n>=x.from && n<=x.to) || UNITS[0];
+  const S4 = SAMPLES[u.n];
+  return { no:n, unit:u.n, goal:S4.goal, syllabus:S4.syllabus, words:S4.words, grammar:S4.grammar,
+           listen:3, speak:2, quiz:5, minutes:S.min };
+}
+
+/* 分级面谈 */
+const PURPOSE = [
+  { id:'work',  zh:'在中国工作',   en:'Work in China',            d:{ zh:'办公室交际、电话、读懂一般邮件与通知', en:'Office talk, phone calls, ordinary emails and notices' }, target:4 },
+  { id:'study', zh:'到中国留学',   en:'Study at a Chinese university', d:{ zh:'中文授课的专业学习与课堂讨论', en:'Degree study taught in Chinese, class discussion' }, target:5 },
+  { id:'exam',  zh:'要考 HSK 证书', en:'Get an HSK certificate',   d:{ zh:'签证、申请或公司要求的等级证明', en:'A certificate for a visa, an application or your employer' }, target:4 },
+  { id:'live',  zh:'在中国生活',   en:'Live in China',            d:{ zh:'租房、看病、办事、和邻居同事往来', en:'Renting, clinics, errands, neighbours and colleagues' }, target:3 },
+  { id:'family',zh:'家里人说中文', en:'My family speaks Chinese', d:{ zh:'家庭场合的日常对话', en:'Everyday conversation at home' }, target:3 },
+  { id:'like',  zh:'兴趣，想学会', en:'Personal interest',        d:{ zh:'能听懂、能聊，不急着考试', en:'Understand and chat; no exam pressure' }, target:2 }
+];
+const TIMELINE = [
+  { id:'exam1213', zh:'我要考 2026 年 12 月 13 日那场', en:'I want to sit the 13 Dec 2026 exam', d:{ zh:'HSK 3.0 首场正式考试', en:'The first official HSK 3.0 sitting' } },
+  { id:'half',     zh:'半年内考一次',   en:'Sit an exam within six months', d:{ zh:'时间宽裕，按正常进度排', en:'Comfortable; normal pace' } },
+  { id:'year',     zh:'一年内就行',     en:'Within a year is fine',         d:{ zh:'稳一点，重打基础', en:'Steadier, with a fuller foundation' } },
+  { id:'none',     zh:'不考试，能用就行', en:'No exam — I just want to use it', d:{ zh:'仍然按等级排课，只是不设考期', en:'Still level-based, just no exam date' } }
+];
+const MINUTES = [
+  { id:15, zh:'15 分钟', en:'15 minutes', rate:0.6 },
+  { id:25, zh:'25 分钟', en:'25 minutes', rate:1 },
+  { id:45, zh:'45 分钟以上', en:'45 minutes or more', rate:1.7 }
+];
+/* 摸底：听辨（三选一）、认字（勾选）、口语自评 */
+const PROBE_AUDIO = {
+  play:'他星期三有空',
+  py:'tā xīngqīsān yǒu kòng',
+  opts:[
+    { en:'He is not here on Wednesday' },
+    { en:'He is free on Wednesday', ok:true },
+    { en:'He is free at three' }
+  ]
+};
+const PROBE_GLYPHS = [
+  { z:'我', lv:1 }, { z:'你好', lv:1 }, { z:'谢谢', lv:1 }, { z:'星期', lv:1 },
+  { z:'便宜', lv:2 }, { z:'医院', lv:2 }, { z:'预约', lv:4 }, { z:'合同', lv:4 }
+];
+const SPOKEN = [
+  { id:'none', zh:'没开口说过',       en:'I have never spoken any', score:0 },
+  { id:'word', zh:'会说几个词',       en:'A few words',             score:1 },
+  { id:'sent', zh:'能说完整的句子',   en:'Whole sentences',         score:2 },
+  { id:'talk', zh:'能和人聊上几分钟', en:'I can chat for a few minutes', score:3 }
+];
+
+/* ============================================================
+   2. 状态
+   ============================================================ */
+const LS = (function(){
+  /* 存储可能被禁用（无痕、沙箱预览、部分浏览器的 file://）。
+     那时不能静默返回默认值——否则一次刷新就把人甩回选老师屏。
+     这里探测一次，不可用就退回内存存储，并且写入永远同时写一份到内存。 */
+  let ok = true; const mem = Object.create(null);
+  try{
+    localStorage.setItem('cc.__probe','1');
+    if (localStorage.getItem('cc.__probe') !== '1') ok = false;
+    localStorage.removeItem('cc.__probe');
+  }catch(_){ ok = false; }
+  return {
+    get persists(){ return ok; },
+    get(k,d){
+      if (ok){ try{ const v = localStorage.getItem(k); if (v !== null) return v; }catch(_){ ok = false; } }
+      return (k in mem) ? mem[k] : d;
+    },
+    set(k,v){
+      mem[k] = String(v);
+      if (ok){ try{ localStorage.setItem(k, String(v)); }catch(_){ ok = false; } }
+    },
+    del(k){ delete mem[k]; if (ok){ try{ localStorage.removeItem(k); }catch(_){ ok = false; } } }
+  };
+})();
+const S = {
+  get lang(){ return LS.get('cc.lang','zh'); },            set lang(v){ LS.set('cc.lang',v); },
+  get done(){ return LS.get('cc.done','')==='1'; },        set done(v){ LS.set('cc.done',v?'1':'0'); },
+  get purpose(){ return LS.get('cc.purpose','work'); },    set purpose(v){ LS.set('cc.purpose',v); },
+  get timeline(){ return LS.get('cc.timeline','exam1213');}, set timeline(v){ LS.set('cc.timeline',v); },
+  get min(){ return parseInt(LS.get('cc.min','25'),10); }, set min(v){ LS.set('cc.min',v); },
+  get startLv(){ return parseInt(LS.get('cc.startLv','1'),10); }, set startLv(v){ LS.set('cc.startLv',v); },
+  get target(){ return parseInt(LS.get('cc.target','4'),10); },   set target(v){ LS.set('cc.target',v); },
+  get lesson(){ return parseInt(LS.get('cc.lesson','15'),10); },  set lesson(v){ LS.set('cc.lesson',v); },
+  get taught(){ return LS.get('cc.taught','')==='1'; },    set taught(v){ LS.set('cc.taught',v?'1':'0'); },
+  get probe(){ return LS.get('cc.probe','0,0,0'); },       set probe(v){ LS.set('cc.probe',v); },
+  get score(){ return LS.get('cc.score',''); },            set score(v){ LS.set('cc.score',v); },
+  get teacher(){ return LS.get('cc.teacher',''); },        set teacher(v){ LS.set('cc.teacher',v); }
+};
+const ZH = () => S.lang === 'zh';
+const TE = () => LC.teacherById(S.teacher);
+const TN = () => ZH() ? TE().name.zh : TE().name.en;
+const TTone = () => LC.toneOf(TE());
+const tx = o => !o ? '' : (ZH() ? o.zh : o.en);
+
+const CN = ['','一','二','三','四','五','六','七','八','九','十'];
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let toastT;
+function toast(zh,en){ const t=$('toast'); t.textContent = ZH()?zh:(en||zh); t.classList.add('on'); $('live').textContent=t.textContent; clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'),2800); }
+
+function daysToExam(){
+  const t=new Date(); t.setHours(0,0,0,0);
+  const e=new Date(EXAM.date+'T00:00:00');
+  return Math.round((e-t)/86400000);
+}
+const lv = n => HSK.find(h=>h.lv===n) || HSK[0];
+const purposeOf = () => PURPOSE.find(p=>p.id===S.purpose) || PURPOSE[0];
+const rateOf = () => (MINUTES.find(m=>m.id===S.min)||MINUTES[1]).rate;
+
+/* 从起点等级到目标等级的总课数 */
+function lessonsBetween(a,b){ let n=0; for(let i=a;i<=b;i++) n+=lv(i).lessons; return n; }
+/* 以当前速度，d 天后会走到哪一级的第几课 */
+function project(d){
+  let left = Math.floor(d * rateOf()) + S.lesson;
+  for (let i=S.startLv;i<=6;i++){
+    const L = lv(i).lessons;
+    if (left <= L) return { level:i, lesson:Math.max(1,left), total:L };
+    left -= L;
+  }
+  return { level:6, lesson:lv(6).lessons, total:lv(6).lessons };
+}
+/* 当前等级内的掌握度（原型按课数线性推算） */
+function mastery(){
+  const L = lv(S.startLv), prog = Math.min(1,(S.lesson-1)/L.lessons);
+  const prev = S.startLv>1 ? lv(S.startLv-1) : { words:0, read:0, write:0 };
+  return {
+    words: Math.round(prev.words + (L.words-prev.words)*prog),
+    read:  Math.round(prev.read  + (L.read -prev.read )*prog),
+    write: L.write ? Math.round(prev.write + (L.write-prev.write)*prog) : 0,
+    gram:  Math.round((S.lesson-1)*1.4)
+  };
+}
+
+/* ============================================================
+   3. 数字人老师画面位
+   ============================================================ */
+function dhPanel(say, sayEn, opts={}){
+  const st = opts.listening ? 'listening' : 'speaking';
+  return `
+  <div class="dh">
+    <div class="dh-stage ${st}" id="dhStage">
+      <img src="${TE().img}" alt="${esc(TN())}"
+           onload="this.closest('.dh-stage').classList.add('has-art')" />
+      <svg class="dh-figure" viewBox="0 0 100 133" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="dhFill" gradientUnits="userSpaceOnUse" x1="16" y1="20" x2="88" y2="130">
+            <stop offset="0" stop-color="#5a7c8b"/><stop offset=".5" stop-color="#2f4652"/><stop offset="1" stop-color="#16222a"/>
+          </linearGradient>
+          <linearGradient id="dhRim" gradientUnits="userSpaceOnUse" x1="24" y1="18" x2="66" y2="76">
+            <stop offset="0" stop-color="#b6dcea" stop-opacity=".55"/><stop offset=".62" stop-color="#b6dcea" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g fill="url(#dhFill)">
+          <path d="M50 54c-6.4 0-10 2.6-10 7.2V82h20V61.2C60 56.6 56.4 54 50 54z"/>
+          <path d="M50 74c-23 0-39 14.6-42.4 36.4L4 133h92l-3.6-22.6C89 88.6 73 74 50 74z"/>
+          <ellipse cx="50" cy="40" rx="15.4" ry="18.4"/>
+        </g>
+        <g fill="url(#dhRim)">
+          <path d="M50 74c-23 0-39 14.6-42.4 36.4L4 133h92l-3.6-22.6C89 88.6 73 74 50 74z"/>
+          <ellipse cx="50" cy="40" rx="15.4" ry="18.4"/>
+        </g>
+      </svg>
+      <div class="dh-slot">${ZH()?'数字人画面位 · 待接入':'Digital-human slot · not yet connected'}</div>
+      <div class="dh-state">
+        <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        ${opts.listening ? (ZH()?'在听你说':'Listening') : (ZH()?'正在讲话':'Speaking')}
+      </div>
+    </div>
+    <div class="dh-say">
+      <div class="dh-who">${TN()}</div>
+      <p class="dh-text" id="dhText">${say}</p>
+      ${ZH() && sayEn ? `<p class="dh-en">${esc(sayEn)}</p>` : ''}
+      <div class="dh-ctl">
+        <button id="dhReplay">${ZH()?'再说一遍':'Say it again'}</button>
+        <button id="dhSlow">${ZH()?'说慢一点':'Slower'}</button>
+        <button id="dhSub">${ZH()?'字幕':'Captions'}</button>
+      </div>
+    </div>
+  </div>`;
+}
+function typeOut(node, html){
+  if (!node) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){ node.innerHTML = html; return; }
+  const tmp=document.createElement('div'); tmp.innerHTML=html;
+  const full=tmp.textContent, tags=html!==full;
+  if (tags){ node.innerHTML=html; return; }
+  node.textContent=''; let i=0;
+  const t=setInterval(()=>{ node.textContent=full.slice(0,++i); if(i>=full.length) clearInterval(t); },26);
+}
+function bindDh(){
+  const r=$('dhReplay'); if(!r) return;
+  r.onclick = ()=>{ const n=$('dhText'); typeOut(n, n.textContent); };
+  $('dhSlow').onclick = ()=> toast('原型里语速是示意的。正式版由数字人实时调速。','Speed is indicative in this prototype. The live build adjusts it in real time.');
+  $('dhSub').onclick  = ()=> toast('字幕常开。正式版可以关掉，只听。','Captions stay on. In the live build you can turn them off and just listen.');
+}
+
+/* ============================================================
+   3c. 选老师（开屏第一件事）
+   ============================================================ */
+let pickD = null;
+function renderPickD(){
+  const list = LC.TEACHERS;
+  const t = LC.teacherById(pickD || list[0].id);
+  pickD = t.id;
+  const n = ZH()? t.name.zh : t.name.en, alt = ZH()? t.name.en : t.name.zh;
+
+  $('root').innerHTML = `
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mk" aria-hidden="true">中</div>
+      <div><b>${ZH()?'中文课':'Chinese Course'}</b><span>${ZH()?'先挑一位老师':'Choose your teacher first'}</span></div>
+    </div>
+    <div class="top-sp"></div>
+    <a class="tbtn" href="mobile.html" style="text-decoration:none">${ZH()?'移动端 ↗':'Mobile ↗'}</a>
+    <button class="tbtn" id="btnLang" aria-pressed="${!ZH()}">${ZH()?'EN':'中文'}</button>
+  </header>
+  <div class="pickd"><div class="pickd-in">
+    <div class="pickd-hero">
+      <img src="${t.img}" alt="${esc(n)}" />
+      ${t.kind==='virtual'?`<span class="pickd-kind">${ZH()?'虚拟形象':'Virtual'}</span>`:''}
+    </div>
+    <div class="pickd-b">
+      <div class="pickd-k">${ZH()?`共 ${list.length} 位老师，选一位开始`:`${list.length} teachers — pick one to begin`}</div>
+      <div class="pickd-name">
+        <b>${esc(n)}</b>${t.native?`<span class="nat">${esc(t.native)}</span>`:''}<i>${esc(alt)}</i>
+      </div>
+      <div class="pickd-meta">
+        <span class="syl">${tx(t.trait)}</span>
+        <span class="pickd-stu">${ZH()?'在教':'teaching'} <b>${t.students.toLocaleString()}</b> ${ZH()?'名学生':'students'}</span>
+      </div>
+      <div class="pickd-meta">
+        <span class="syl">${ZH()?`用${t.langName.zh}给你讲解`:`Explains in ${t.langName.en}`}</span>
+        <span class="syl" style="background:var(--bg-2);color:var(--ink-3)">${tx(t.sub)}</span>
+      </div>
+      <p class="pickd-intro">${ZH()? t.intro.zh : t.intro.en}</p>
+      <div class="pickd-strip">
+        ${list.map(x=>`<button class="pickd-th ${x.id===t.id?'on':''}" data-pickd="${x.id}"
+           aria-label="${esc(ZH()?x.name.zh:x.name.en)}" title="${esc(ZH()?x.name.zh:x.name.en)}"><img src="${x.img}" alt="" /></button>`).join('')}
+      </div>
+      <div class="act" style="margin-top:24px">
+        <button class="btn" id="pickdGo">${ZH()?'就他了，开始面谈':'Start the interview with them'}</button>
+      </div>
+      <p class="std" style="margin-top:14px">${ZH()
+        ? '选谁会决定形象、说话的语气，以及讲解用哪种语言。进去之后也能在「老师」里换。'
+        : 'Your choice sets the face, the tone of voice, and the language explanations are given in. You can change it later.'}</p>
+    </div>
+  </div></div>`;
+
+  $('btnLang').onclick = ()=>{ S.lang = ZH()?'en':'zh'; renderPickD(); };
+  document.querySelectorAll('[data-pickd]').forEach(b=>b.onclick=()=>{ pickD=b.dataset.pickd; renderPickD(); });
+  $('pickdGo').onclick = ()=>{
+    S.teacher = t.id; step = 0;
+    D = { purpose:'', timeline:'', audio:null, glyphs:[], spoken:null, min:25 };
+    renderIntake();
+  };
+}
+
+/* ============================================================
+   4. 教学端首页
+   ============================================================ */
+function renderHome(){
+  const L = lessonOf(S.lesson), cur = lv(S.startLv), tgt = lv(S.target);
+  const m = mastery(), unit = UNITS.find(u=>u.n===L.unit);
+  const kw = L.words.slice(0,2).map(w=>w.z);
+  const d = daysToExam(), p = project(d);
+  const gateOpen = S.taught;
+
+  const say = S.taught
+    ? { zh:`第 ${L.no} 课记上了。「${kw[0]}」你读得稳，「${kw[1]}」还要再带一次，明天开课先补。现在可以去剧场把今天的话用一次。`,
+        en:`Lesson ${L.no} is logged. ${kw[0]} is steady; ${kw[1]} needs one more pass, which I’ll put at the start of tomorrow. You can go to the theater now and use today’s language.` }
+    : { zh: TTone().greet.zh(L.no, unit.zh), en: TTone().greet.en(L.no, unit.en.toLowerCase()) };
+
+  $('root').innerHTML = `
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mk" aria-hidden="true">中</div>
+      <div><b>${ZH()?'中文课':'Chinese Course'}</b><span>${ZH()?'数字人一对一 · HSK 3.0 课程体系':'One-to-one with a digital teacher · HSK 3.0'}</span></div>
+    </div>
+    <div class="top-sp"></div>
+    <div class="top-lv">
+      <span>${ZH()?'当前':'Now'} <b>HSK ${cur.lv}</b></span>
+      <span style="color:var(--ink-4)">→</span>
+      <span>${ZH()?'目标':'Target'} <b>HSK ${tgt.lv}</b></span>
+    </div>
+    <button class="tbtn" id="btnSwap">${ZH()?'换老师':'Change teacher'}</button>
+    <a class="tbtn" href="mobile.html" style="text-decoration:none">${ZH()?'移动端 ↗':'Mobile ↗'}</a>
+    <button class="tbtn" id="btnSyllabus">${ZH()?'课程表':'Syllabus'}</button>
+    <button class="tbtn" id="btnLang" aria-pressed="${!ZH()}">${ZH()?'EN':'中文'}</button>
+    <button class="tbtn" id="btnDemo">${ZH()?'演示':'Demo'}</button>
+  </header>
+
+  <div class="wrap">
+    <div class="lead">
+      ${dhPanel(say.zh, say.en)}
+
+      <div>
+        <section class="card">
+          <div class="lesson-top">
+            <div class="lesson-id">${ZH()?'第':'Lesson'}<b class="num">${L.no}</b>${ZH()?'课':''}</div>
+            <div class="lesson-meta">
+              <div class="lesson-unit">HSK ${cur.lv} &nbsp;·&nbsp; ${ZH()?`第${CN[unit.n]}单元 ${unit.zh}`:`Unit ${unit.n} ${unit.en}`}<span class="lesson-dur">${L.minutes} ${ZH()?'分钟':'min'}</span></div>
+              <h1 class="lesson-goal">${tx(L.goal)}</h1>
+              ${ZH()?`<p class="lesson-goal-en">${esc(L.goal.en)}</p>`:''}
+              <div class="syl">${tx(L.syllabus)}</div>
+            </div>
+          </div>
+
+          <div class="steps">
+            ${[
+              { n:1, t:{zh:'本课目标',zh2:'',en:'Objective'},  d:{zh:'说明学完能做什么，对应大纲哪一条',en:'What you’ll be able to do, and where it sits in the syllabus'}, c:{zh:'2 分钟',en:'2 min'} },
+              { n:2, t:{zh:'生词',en:'Vocabulary'},            d:{zh:'发音、词性、例句、辨析',en:'Pronunciation, part of speech, examples, contrasts'}, c:{zh:`${L.words.length} 个`,en:`${L.words.length} words`} },
+              { n:3, t:{zh:'语法点',en:'Grammar'},             d:{zh:'结构讲解与替换练习',en:'Structure explained, then substitution drills'}, c:{zh:`${L.grammar.length} 个`,en:`${L.grammar.length} points`} },
+              { n:4, t:{zh:'听力',en:'Listening'},             d:{zh:'老师朗读与对话，逐句确认',en:'Read-aloud and dialogue, checked line by line'}, c:{zh:`${L.listen} 段`,en:`${L.listen} passages`} },
+              { n:5, t:{zh:'跟读与口语',en:'Speaking'},        d:{zh:'跟读纠音，再自己造句',en:'Repeat for correction, then produce your own'}, c:{zh:`${L.speak} 项`,en:`${L.speak} tasks`} },
+              { n:6, t:{zh:'当堂小测',en:'Check'},             d:{zh:'五题，结果写进掌握度',en:'Five items; results go into your record'}, c:{zh:`${L.quiz} 题`,en:`${L.quiz} items`}, q:true }
+            ].map(s=>`<div class="srow${s.q?' quiz':''}">
+              <span class="srow-n num">${s.n}</span>
+              <span class="srow-t">${tx(s.t)}</span>
+              <span class="srow-d">${tx(s.d)}</span>
+              <span class="srow-c">${tx(s.c)}</span>
+            </div>`).join('')}
+          </div>
+
+          <div class="words">
+            ${L.words.map(w=>`<div class="word"><b>${w.z}</b><span>${w.p}</span></div>`).join('')}
+          </div>
+
+          <div class="act">
+            <button class="btn" id="btnTeach">${S.taught?(ZH()?'再上一遍':'Take it again'):(ZH()?'上课':'Start the lesson')}</button>
+            <button class="link" id="btnPreview">${ZH()?'先看看这节课讲什么':'See what’s in this lesson'}</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h"><h2>${ZH()?'你的等级账本':'Your level record'}</h2>
+            <span class="hint">${ZH()?'按 2025 年 HSK 考试大纲':'Per the 2025 HSK syllabus'}</span></div>
+          <div class="ledger-top">
+            <div class="lv-now">${ZH()?'现在':'Now'}<b>HSK ${cur.lv}</b></div>
+            <span class="lv-arrow">→</span>
+            <div class="lv-now">${ZH()?'目标':'Target'}<b>HSK ${tgt.lv}</b></div>
+            <div class="lv-exam">
+              ${ZH()?EXAM.label.zh:EXAM.label.en} ${EXAM.date}<br>
+              ${d>0?`${ZH()?'还有':'in'} <b class="num">${d}</b> ${ZH()?'天':'days'}`:(ZH()?'已开考':'已开考')}
+            </div>
+          </div>
+          <div class="track" aria-label="${ZH()?'到目标等级的进度':'Progress to target level'}">
+            ${HSK.filter(h=>h.lv>=S.startLv&&h.lv<=S.target).map(h=>{
+              const w = (h.lessons/lessonsBetween(S.startLv,S.target)*100).toFixed(2);
+              if (h.lv < cur.lv) return `<i class="done" style="width:${w}%"></i>`;
+              if (h.lv === cur.lv){
+                const inner=(S.lesson-1)/h.lessons;
+                return `<i class="cur" style="width:${(w*inner).toFixed(2)}%"></i><i style="width:${(w*(1-inner)).toFixed(2)}%"></i>`;
+              }
+              return `<i style="width:${w}%"></i>`;
+            }).join('')}
+          </div>
+          <div class="track-cap"><span>${ZH()?`HSK ${cur.lv} 第 ${S.lesson} / ${cur.lessons} 课`:`HSK ${cur.lv}, lesson ${S.lesson} of ${cur.lessons}`}</span>
+            <span>${ZH()?`距 HSK ${tgt.lv} 还有 ${lessonsBetween(S.startLv,S.target)-S.lesson} 课`:`${lessonsBetween(S.startLv,S.target)-S.lesson} lessons to HSK ${tgt.lv}`}</span></div>
+
+          <div class="meters">
+            ${[
+              { t:{zh:'词汇',en:'Vocabulary'},     v:m.words, max:cur.words },
+              { t:{zh:'认读汉字',en:'Characters read'}, v:m.read,  max:cur.read },
+              { t:{zh:'书写汉字',en:'Characters written'}, v:m.write, max:cur.write, off:!cur.write,
+                note:{zh:'HSK 2 起考',en:'from HSK 2'} },
+              { t:{zh:'课程语法点',en:'Grammar points'}, v:m.gram, max:56, course:true }
+            ].map(x=>`<div class="meter${x.off?' off':''}">
+              <div class="meter-t">${tx(x.t)}${x.course?`<span title="${ZH()?'本课程自定，非大纲条目':'Our course’s own count, not a syllabus figure'}" style="color:var(--ink-4)"> ✻</span>`:''}</div>
+              <div class="meter-v num">${x.off?(ZH()?x.note.zh:x.note.en):`${x.v} <s>/ ${x.max}</s>`}</div>
+              ${x.off?'':`<div class="meter-bar"><i style="width:${Math.min(100,x.v/x.max*100).toFixed(1)}%"></i></div>`}
+            </div>`).join('')}
+          </div>
+          <p class="std">${ZH()
+            ? '✻ 语法点为本课程自定的计数，不是大纲条目。词汇与汉字按 2025 年考试大纲，一级 300 词、认读 246 字。'
+            : '✻ Grammar points are our own count, not a syllabus figure. Vocabulary and characters follow the 2025 exam syllabus: 300 words and 246 characters at level 1.'}
+            <button id="btnStd">${ZH()?'看各级口径 →':'See all levels →'}</button></p>
+        </section>
+
+        <section class="card">
+          <div class="card-h"><h2>${ZH()?'老师的分级依据':'How your level was set'}</h2>
+            <span class="hint">${ZH()?'入学面谈':'From your intake'}</span></div>
+          <ul class="why-list">
+            <li><span class="q">${ZH()?'学习目的':'Purpose'}</span><span class="a">${ZH()?purposeOf().zh:purposeOf().en} — ${tx(purposeOf().d)}。${ZH()?'这类用途通常需要到':'This normally calls for'} <em>HSK ${purposeOf().target}</em>。</span></li>
+            <li><span class="q">${ZH()?'摸底结果':'Placement'}</span><span class="a">${probeSummary()}${ZH()?'，因此起点定在':' — so you start at'} <em>HSK ${cur.lv}</em>${ZH()?'。':'.'}</span></li>
+            <li><span class="q">${ZH()?'每日时长':'Daily time'}</span><span class="a">${S.min} ${ZH()?'分钟，一天一课。':'minutes, one lesson a day.'}</span></li>
+          </ul>
+          <p class="recheck">${ZH()
+            ? `第 20 课结束后我会重新摸一次底。如果你比预计快，目标等级会往上调；慢了就把单元拉长，不会硬赶。`
+            : `I re-test you after lesson 20. If you’re ahead of the projection I raise the target; if you’re behind I stretch the units rather than push you through.`}</p>
+        </section>
+
+        <div class="practice">
+          <div class="practice-h">
+            <h2>${ZH()?'课后实践':'After the lesson'}</h2>
+            <p>${ZH()
+              ? `《生活剧场》是另一个地方：一条虚构的街，你在那里和人用中文把事情办成。那里不教新词，只会用到你已经学过的——现在是 ${m.words} 个词。`
+              : `The Living Theater is a separate place — a fictional street where you get things done in Chinese. Nothing new is taught there; it only uses what you have already learned, currently ${m.words} words.`}</p>
+          </div>
+          <div class="gate ${gateOpen?'open':''}">
+            <div class="gate-i" aria-hidden="true">
+              ${gateOpen
+                ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 11V7a5 5 0 0 1 9.5-2"/><rect x="4" y="11" width="16" height="10" rx="2"/></svg>`
+                : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`}
+            </div>
+            <div class="gate-b">
+              <div class="gate-t">${ZH()?'生活剧场':'The Living Theater'}</div>
+              <div class="gate-d">${gateOpen
+                ? (ZH()?`第 ${L.no} 课已完成。今天的场景会用到「${kw[0]}」和「${kw[1]}」。`:`Lesson ${L.no} complete. Today’s scene uses ${kw[0]} and ${kw[1]}.`)
+                : (ZH()?`第 ${L.no} 课上完才开。没学过就进去只是听个热闹，练不到东西。`:`Opens once lesson ${L.no} is done. Walking in unprepared is spectating, not practice.`)}</div>
+            </div>
+            <div class="gate-a">
+              ${gateOpen
+                ? `<a class="btn-amber" href="theater.html">${ZH()?'进入剧场':'Enter the theater'}</a>`
+                : `<button class="link" style="color:#c3b49c;text-decoration-color:rgba(195,180,156,.4)" id="btnWhyGate">${ZH()?'为什么要先上课？':'Why the lesson first?'}</button>`}
+            </div>
+          </div>
+        </div>
+
+        <footer class="foot">
+          ${ZH()
+            ? `原型 v6 · 本轮做的是分级面谈与教学端首页；课时内部（生词、语法、听力、口语、小测）还没做。课后实践接到现有的 <a href="theater.html">生活剧场</a>。`
+            : `Prototype v6 · This round covers the placement interview and the course home. The lesson interior isn’t built yet. Practice hands off to the existing <a href="theater.html">Living Theater</a>.`}
+        </footer>
+      </div>
+    </div>
+  </div>`;
+
+  bindDh();
+  typeOut($('dhText'), say.zh ? (ZH()?say.zh:say.en) : '');
+  $('btnLang').onclick = ()=>{ S.lang = ZH()?'en':'zh'; renderHome(); };
+  $('btnDemo').onclick = ()=> $('demo').classList.toggle('on');
+  $('btnSwap').onclick = ()=>{ pickD = S.teacher; S.teacher=''; renderPickD(); };
+  $('btnSyllabus').onclick = openSyllabus;
+  $('btnStd').onclick = openStandard;
+  $('btnTeach').onclick = ()=>{
+    if (unit.n !== 3){
+      toast('原型里只有第三单元这一课做通了。用「课程表」跳到第 15 课。',
+            'Only the Unit 3 lesson is built out. Jump to lesson 15 from the syllabus.');
+      return;
+    }
+    openRoom();
+  };
+  $('btnPreview').onclick = openPreview;
+  if ($('btnWhyGate')) $('btnWhyGate').onclick = ()=> toast(
+    '剧场只用你学过的词，不教新词。先上课，上台才练得到东西。',
+    'The theater only uses words you have learned. Take the lesson first, or there is nothing to practise.');
+}
+
+function probeSummary(){
+  const [a,g,s] = S.probe.split(',').map(Number);
+  const heard = a ? (ZH()?'听辨题答对':'passed the listening item') : (ZH()?'听辨题没答对':'missed the listening item');
+  const ch = ZH()?`认得 ${g} / 8 个常用词`:`recognised ${g} of 8 common words`;
+  const sp = ZH()?(SPOKEN[s]||SPOKEN[0]).zh:(SPOKEN[s]||SPOKEN[0]).en;
+  const sep = ZH() ? '，' : ', ';
+  return `${heard}${sep}${ch}${sep}${ZH()?'口语':'speaking: '}${sp}`;
+}
+
+/* ============================================================
+   4b. 课堂：全屏讲解 + 练习（数据来自 lesson-core.js）
+   ============================================================ */
+const LC = window.LessonCore;
+const L15 = LC.L15, LSTEPS = LC.STEP_NAMES;
+let R = null, roomTimer = null;
+
+const RI = {
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  play:'<path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/>',
+  pause:'<rect x="7" y="5" width="3.4" height="14" rx="1.2" fill="currentColor" stroke="none"/><rect x="13.6" y="5" width="3.4" height="14" rx="1.2" fill="currentColor" stroke="none"/>',
+  repeat:'<path d="M4 10V8a3 3 0 0 1 3-3h13"/><path d="M17 2l3 3-3 3"/><path d="M20 14v2a3 3 0 0 1-3 3H4"/><path d="M7 22l-3-3 3-3"/>',
+  snail:'<circle cx="13" cy="14" r="5.5"/><path d="M7.5 19H13"/><path d="M7.5 19c-2 0-3.5-1.3-3.5-3 0-1.4 1-2.6 2.5-3"/><path d="M6.5 8.5 5 5M9.5 8 9 4.5"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .9-1 1.6v.4"/><path d="M12 17h.01"/>',
+  right:'<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>',
+  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="3.5"/>',
+  mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/>',
+  check:'<path d="M4 12.5 9.5 18 20 7"/>'
+};
+const ri = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RI[n]}</svg>`;
+function rsay(t, rate=0.84){
+  try{ const u=new SpeechSynthesisUtterance(t); u.lang='zh-CN'; u.rate=rate;
+       speechSynthesis.cancel(); speechSynthesis.speak(u); return true; }catch(_){ return false; }
+}
+
+function openRoom(){
+  R = { seg:0, sub:0, ans:{}, t0:Date.now(), tk:null, right:0 };
+  document.body.style.overflow='hidden';
+  renderRoom();
+}
+function closeRoom(){
+  clearTimeout(roomTimer); roomTimer=null; R=null; LS.del('cc.lsn');
+  document.body.style.overflow='';
+  $('room').className=''; $('room').innerHTML='';
+  renderHome();
+}
+/* 课时进度落盘：刷新之后能从中断的那一段接着上 */
+function saveRoom(){
+  if (!R) return LS.del('cc.lsn');
+  try{ LS.set('cc.lsn', JSON.stringify({ seg:R.seg, sub:R.sub, ans:R.ans })); }catch(_){}
+}
+function restoreRoom(){
+  const raw = LS.get('cc.lsn','');
+  if (!raw) return null;
+  try{
+    const o = JSON.parse(raw);
+    if (!o || typeof o.seg !== 'number' || o.seg < 0 || o.seg >= LC.SEGS.length) return null;
+    R = { seg:o.seg, sub:o.sub||0, ans:o.ans||{}, t0:Date.now(), tk:null, right:0 };
+    document.body.style.overflow='hidden';
+    return o.seg;
+  }catch(_){ LS.del('cc.lsn'); return null; }
+}
+const rSeg = () => LC.SEGS[R.seg];
+function rGo(n){ clearTimeout(roomTimer); roomTimer=null; R.seg=n; R.sub=0; R.tk=null; renderRoom(); }
+function rNext(){ if (R.seg < LC.SEGS.length-1) rGo(R.seg+1); }
+function rOpenTalk(id, nested){
+  const t = LC.TALKS[id];
+  R.tk = { id, beats:t.beats.slice(), i:0, paused:false, slow:false, picked:null,
+           done:false, used:false, armed:-1, nested:!!nested };
+  renderRoom();
+}
+function rTalkNext(){
+  const tk=R.tk; if(!tk) return;
+  clearTimeout(roomTimer); roomTimer=null;
+  if (tk.i < tk.beats.length-1) tk.i++; else tk.done=true;
+  renderRoom();
+}
+function rBoardSpeak(b){
+  if (!b) return '';
+  if (b.t==='line') return b.z;
+  if (b.t==='rows'){ const g=b.rows.find(r=>r.mark==='✓'); return g?g.z:''; }
+  if (b.t==='slot'){ const z=b.cells.map(c=>c.z).join(''); return z.length>1?z:''; }
+  if (b.t==='list') return (b.items[0]&&b.items[0].z)||'';
+  if (b.t==='tone') return b.sylls.map(x=>x.z).join('');
+  return '';
+}
+
+function renderRoom(){
+  if (!R) return;
+  saveRoom();
+  const seg = rSeg(), talk = seg.kind==='talk' || R.tk;
+  const u = UNITS.find(x=>x.n===3);
+  const head = (tag) => `
+    <header class="room-top">
+      <button class="room-x" id="rx" aria-label="${ZH()?'退出':'Exit'}">${ri('x')}</button>
+      ${tag ? `<span class="room-tag">${ri('spark')} ${tag}</span>` : ''}
+      <span class="room-ttl">${ZH()?`第 ${S.lesson} 课 · ${tx(LSTEPS[seg.step])} · 第三单元 ${u.zh}`
+                                 :`Lesson ${S.lesson} · ${tx(LSTEPS[seg.step])} · Unit 3 ${u.en}`}</span>
+      <div class="room-bar" aria-hidden="true">${LSTEPS.map((_,k)=>
+        `<i class="${k<seg.step?'on':k===seg.step?'now':''}"></i>`).join('')}</div>
+      <span class="room-min">${S.min}′</span>
+    </header>`;
+
+  const bg = `<div class="room-bg"><img src="${TE().img}" alt="" /><div class="room-scrim"></div></div>`;
+
+  /* ---------- 讲解 ---------- */
+  if (talk){
+    if (seg.kind==='talk' && !R.tk) return rOpenTalk(seg.talk);
+    const tk = R.tk;
+    if (!tk) return;
+    const T = LC.TALKS[tk.id], beat = tk.beats[tk.i];
+    let board=null;
+    for (let k=tk.i;k>=0;k--){ if (tk.beats[k].board){ board=tk.beats[k].board; break; } }
+    const sp = rBoardSpeak(board);
+
+    const chk = tk.done && T.check ? `
+      <div class="room-chk">
+        <div class="k">${ZH()?'听懂了吗':'QUICK CHECK'}</div>
+        <h3>${tx(T.check.q)}</h3>
+        ${T.check.opts.map((o,k)=>{
+          let cls=''; if (tk.picked!==null) cls = o.ok?'ok':(tk.picked===k?'no':'dim');
+          return `<button class="qopt ${cls}" data-chk="${k}"><span class="k num">${k+1}</span><span>${tx(o.t)}</span></button>`;
+        }).join('')}
+        ${tk.picked!==null?`<div class="fb ${T.check.opts[tk.picked].ok?'ok':'no'}">${
+            T.check.opts[tk.picked].ok?tx(T.check.ok):tx(T.check.no)}</div>
+          <div style="height:14px"></div>
+          <button class="btn" id="rgo" style="width:100%">${ZH()?'继续':'Continue'}</button>`:''}
+      </div>` : '';
+
+    $('room').className='room on'; $('room').dataset.mode='talk';
+    $('room').innerHTML = `${bg}${head(tx(T.tag))}
+      <main class="room-main">
+        <div class="room-board" id="rboard">${board?LC.boardHTML(board, ZH()):''}</div>
+        ${chk}
+      </main>
+      <footer class="room-foot">
+        <div class="room-cap">
+          <p class="room-say">${ZH()?beat.zh:beat.en}</p>
+          ${ZH()&&beat.en?`<p class="room-en">${esc(beat.en)}</p>`:''}
+          ${['en','zh'].indexOf(TE().lang)<0?`<p class="room-en" style="opacity:.6">※ ${
+            ZH()?`正式版${TE().name.zh}会用${TE().langName.zh}讲解，原型字幕只写了中文和英文。`
+                :`In the real build ${TE().name.en} explains in ${TE().langName.en}; this prototype only has Chinese and English captions.`}</p>`:''}
+        </div>
+        ${chk?'':`<div class="room-ctl">
+          <button id="rpause" class="${tk.paused?'lit':''}">${tk.paused?ri('play'):ri('pause')}${tk.paused?(ZH()?'继续':'Play'):(ZH()?'暂停':'Pause')}</button>
+          <button id="rback">${ri('repeat')}${ZH()?'重说这句':'Say it again'}</button>
+          <button id="rslow" class="${tk.slow?'lit':''}">${ri('snail')}${ZH()?'说慢一点':'Slower'}</button>
+          <button id="rhuh" ${tk.used?'disabled':''}>${ri('help')}${ZH()?'我没听懂':'Lost me'}</button>
+          ${sp?`<button id="rspeak">${ri('play')}${ZH()?'读一遍例句':'Read the example'}</button>`:''}
+          <button id="rskip" style="margin-left:auto">${ZH()?'跳过讲解':'Skip'} ${ri('right')}</button>
+        </div>`}
+        ${tk.done && !T.check ? `<div class="room-ctl"><button id="rgo" class="lit">${ZH()?'继续':'Continue'} ${ri('right')}</button></div>`:''}
+      </footer>`;
+
+    $('rx').onclick = closeRoom;
+    if ($('rboard')) $('rboard').onclick = ()=>{ if(!tk.done) rTalkNext(); };
+    if ($('rpause')) $('rpause').onclick = ()=>{
+      tk.paused=!tk.paused; if(tk.paused){clearTimeout(roomTimer);roomTimer=null;} else tk.armed=-1; renderRoom(); };
+    if ($('rback')) $('rback').onclick = ()=>{ tk.armed=-1; renderRoom(); };
+    if ($('rslow')) $('rslow').onclick = ()=>{ tk.slow=!tk.slow; tk.armed=-1; renderRoom(); };
+    if ($('rhuh')) $('rhuh').onclick = ()=>{
+      if (tk.used) return;
+      tk.beats.splice(tk.i+1, 0, ...(LC.TALKS[tk.id].again||[]));
+      tk.used=true; tk.armed=-1; rTalkNext(); };
+    if ($('rspeak')) $('rspeak').onclick = ()=>{ if(!rsay(sp)) toast('这台设备没有中文语音。','No Chinese voice on this device.'); };
+    if ($('rskip')) $('rskip').onclick = ()=>{ if (tk.nested){ R.tk=null; renderRoom(); } else rNext(); };
+    document.querySelectorAll('[data-chk]').forEach(b=>b.onclick=()=>{
+      if (tk.picked!==null) return; tk.picked=+b.dataset.chk; renderRoom(); });
+    if ($('rgo')) $('rgo').onclick = ()=>{ if (tk.nested){ R.tk=null; renderRoom(); } else rNext(); };
+
+    if (!tk.done && !tk.paused && tk.armed !== tk.i){
+      tk.armed = tk.i; clearTimeout(roomTimer);
+      roomTimer = setTimeout(rTalkNext, LC.beatDur(beat, ZH(), tk.slow));
+    }
+    return;
+  }
+
+  /* ---------- 练习 ---------- */
+  let card='';
+
+  if (seg.kind==='words'){
+    const w=L15.words[R.sub], last=R.sub===L15.words.length-1;
+    card = `<div class="eyebrow">${ZH()?`生词 ${R.sub+1} / 8`:`Word ${R.sub+1} of 8`}</div>
+      <div style="text-align:center;padding:14px 0 4px">
+        <div style="font-family:var(--song);font-size:72px;line-height:1.05">${w.z}</div>
+        <div style="font-size:19px;color:var(--accent);font-weight:600;margin-top:8px">${w.p}</div>
+        <div style="font-size:14.5px;color:var(--ink-3);margin-top:3px">${tx(w.m)}</div>
+        <span class="syl" style="margin-top:10px">${tx(w.pos)}</span>
+      </div>
+      <div style="background:#f6f8f9;border-radius:5px;padding:15px 17px;margin-top:16px">
+        <b style="font-family:var(--song);font-size:21px;font-weight:400;display:block">${w.eg}</b>
+        <i style="font-style:normal;display:block;font-size:13px;color:var(--accent);font-weight:600;margin-top:4px">${w.egp}</i>
+        <span style="display:block;font-size:13px;color:var(--ink-3);margin-top:2px">${w.ege}</span>
+      </div>
+      <div class="act" style="margin-top:20px">
+        <button class="btn" id="rgo">${last?(ZH()?'八个词看完了':'All eight done'):(ZH()?'下一个':'Next')}</button>
+        <button class="btn ghost" id="rhear">${ZH()?'听一遍':'Listen'}</button>
+        ${R.sub>0?`<button class="link" id="rprev">${ZH()?'上一个':'Back'}</button>`:''}
+      </div>`;
+  }
+
+  if (seg.kind==='drill'){
+    const g=L15.grammar[seg.i], a=R.ans['g'+seg.i];
+    card = `<div class="eyebrow">${ZH()?'刚讲过的 · 替换练习':'Just covered · substitution drill'}</div>
+      <h2>${tx(g.t)}</h2>
+      <span class="syl">${g.struct}</span>
+      <div style="font-family:var(--song);font-size:34px;text-align:center;margin:24px 0 20px;line-height:1.5">
+        ${g.drill.q[0]}<u style="text-decoration:none;display:inline-block;min-width:64px;border-bottom:3px ${a?'solid':'dashed'} var(--accent);color:var(--accent)">${a||'　　'}</u>${g.drill.q[1]}
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        ${g.drill.pool.map(c=>{
+          let st='background:#f6f8f9';
+          if (a){ st = c===g.drill.blank ? 'background:#e6f0ea;color:var(--pass)'
+                   : (c===a ? 'background:#f6e9e4;color:#9a5a3a' : 'opacity:.4'); }
+          return `<button data-chip="${c}" style="font-family:var(--song);font-size:24px;padding:11px 18px;border-radius:5px;${st}">${c}</button>`;
+        }).join('')}
+      </div>
+      ${a?`<div class="fb ${a===g.drill.blank?'ok':'no'}" style="margin-top:20px">${
+          a===g.drill.blank?(ZH()?'对了。':'Correct.'):(ZH()?'不对。':'Not quite. ')+tx(g.drill.hint)}</div>
+        <div class="act" style="margin-top:18px"><button class="btn" id="rgo">${ZH()?'继续':'Continue'}</button></div>`
+       :`<p class="card-sub" style="text-align:center;margin:18px 0 0">${tx(g.drill.hint)}</p>`}`;
+  }
+
+  if (seg.kind==='listen'){
+    const q=L15.listen[R.sub], a=R.ans['l'+R.sub];
+    card = `<div class="eyebrow">${ZH()?`听力 ${R.sub+1} / 3`:`Listening ${R.sub+1} of 3`}</div>
+      <h2>${tx(q.q)}</h2>
+      <div class="act" style="margin:16px 0 18px"><button class="btn ghost" id="rhear">${ZH()?'点一下听':'Tap to listen'}</button>
+        <span class="card-sub" style="margin:0">${ZH()?'可以反复听':'Replay as often as you like'}</span></div>
+      ${q.opts.map((o,k)=>{
+        let cls=''; if (a!==undefined) cls = o.ok?'ok':(a===k?'no':'dim');
+        return `<button class="qopt ${cls}" data-l="${k}"><span class="k num">${k+1}</span>
+          <span>${o.t}${o.sfx?tx(o.sfx):''}${o.sub?` <small style="color:var(--ink-3)">${o.sub}</small>`:''}</span></button>`;
+      }).join('')}
+      ${a!==undefined?`<div class="fb ${q.opts[a].ok?'ok':'no'}">${q.opts[a].ok?(ZH()?'对了。':'Correct.'):(ZH()?'没对。听的是：':'Not it. You heard: ')+q.play}</div>
+        <div class="act" style="margin-top:18px">
+          <button class="btn" id="rgo">${R.sub===2?(ZH()?'进入口语':'On to speaking'):(ZH()?'下一段':'Next clip')}</button>
+          ${!q.opts[a].ok?`<button class="btn ghost" id="rwhy">${ZH()?'让老师讲一下':'Have the teacher explain'}</button>`:''}
+        </div>`:''}`;
+  }
+
+  if (seg.kind==='speak'){
+    const task=L15.speak[R.sub];
+    if (task.kind==='repeat'){
+      const k=R.ans.rep||0, line=task.lines[Math.min(k,task.lines.length-1)], done=k>=task.lines.length;
+      card = `<div class="eyebrow">${ZH()?`跟读 ${Math.min(k+1,3)} / 3`:`Repeat ${Math.min(k+1,3)} of 3`}</div>
+        <div style="text-align:center;padding:16px 0 6px">
+          <div style="font-family:var(--song);font-size:38px;line-height:1.4">${line.z}</div>
+          <div style="font-size:16px;color:var(--accent);font-weight:600;margin-top:8px">${line.p}</div>
+          <div style="font-size:13px;color:var(--ink-3);margin-top:3px">${line.e}</div>
+        </div>
+        <div class="act" style="margin-top:18px;justify-content:center">
+          <button class="btn ghost" id="rhear">${ZH()?'听老师读':'Hear the teacher'}</button>
+          <button class="btn" id="rmic">${ZH()?'按住说话':'Hold to speak'}</button>
+        </div>
+        <p class="card-sub" id="rmicCap" style="text-align:center;margin-top:12px">${ZH()?'按住按钮说话，松手给反馈':'Hold the button, release for feedback'}</p>
+        ${R.ans.repFb?`<div class="fb ${R.ans.repFb.ok?'ok':'no'}">${R.ans.repFb.t}</div>`:''}
+        ${done?`<div class="act" style="margin-top:18px"><button class="btn" id="rgo">${ZH()?'进入自由表达':'On to free speaking'}</button></div>`:''}`;
+    } else {
+      card = `<div class="eyebrow">${ZH()?'自由表达':'Free speaking'}</div>
+        <h2 style="font-family:var(--song);font-weight:400;font-size:30px;margin-top:10px">${task.ask.z}</h2>
+        <div style="font-size:15px;color:var(--accent);font-weight:600;margin-top:5px">${task.ask.p}</div>
+        <div style="font-size:13px;color:var(--ink-3);margin-top:3px">${task.ask.e}</div>
+        <div class="act" style="margin-top:20px"><button class="btn" id="rmic">${ZH()?'按住说话':'Hold to speak'}</button></div>
+        <p class="card-sub" id="rmicCap" style="margin-top:12px">${ZH()?'用今天学的词回答':'Answer with today’s words'}</p>
+        ${R.ans.freeFb?`<div class="fb ok">${R.ans.freeFb}</div>
+          <div style="background:#f6f8f9;border-radius:5px;padding:15px 17px;margin-top:12px">
+            <b style="font-family:var(--song);font-size:21px;font-weight:400;display:block">${task.model.z}</b>
+            <i style="font-style:normal;display:block;font-size:13px;color:var(--accent);font-weight:600;margin-top:4px">${task.model.p}</i>
+            <span style="display:block;font-size:13px;color:var(--ink-3);margin-top:2px">${task.model.e}</span>
+          </div>
+          <div class="act" style="margin-top:18px"><button class="btn" id="rgo">${ZH()?'进入小测':'On to the check'}</button></div>`:''}`;
+    }
+  }
+
+  if (seg.kind==='quiz'){
+    const q=L15.quiz[R.sub], a=R.ans['q'+R.sub];
+    let inner;
+    if (q.order){
+      const picked=R.ans['o'+R.sub]||[];
+      const right=picked.length===q.answer.length && picked.every((x,k)=>x===q.answer[k]);
+      inner = `<div style="font-family:var(--song);font-size:32px;text-align:center;margin:18px 0">${picked.length?picked.join(''):'　　　'}</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          ${q.pool.map(c=>`<button data-ord="${c}" style="font-family:var(--song);font-size:24px;padding:11px 18px;border-radius:5px;background:#f6f8f9;${picked.includes(c)?'opacity:.35;pointer-events:none':''}">${c}</button>`).join('')}
+        </div>
+        ${picked.length?`<div style="text-align:center;margin-top:12px"><button class="link" id="rclr">${ZH()?'清空重排':'Clear'}</button></div>`:''}
+        ${picked.length===q.answer.length?`<div class="fb ${right?'ok':'no'}">${right?tx(q.fb.ok):tx(q.fb.no)}</div>`:''}`;
+    } else {
+      inner = (q.play?`<div class="act" style="margin:14px 0 16px"><button class="btn ghost" id="rhear">${ZH()?'点一下听':'Tap to listen'}</button></div>`:'')
+        + q.opts.map((o,k)=>{
+            let cls=''; if (a!==undefined) cls = o.ok?'ok':(a===k?'no':'dim');
+            return `<button class="qopt ${cls}" data-q="${k}"><span class="k num">${k+1}</span>
+              <span${q.zh?' style="font-family:var(--song);font-size:20px"':''}>${o.t}${o.sub?` <small style="color:var(--ink-3);font-family:var(--sans)">${o.sub}</small>`:''}</span></button>`;
+          }).join('')
+        + (a!==undefined?`<div class="fb ${q.opts[a].ok?'ok':'no'}">${q.opts[a].ok?tx(q.fb.ok):tx(q.fb.no)}</div>`:'');
+    }
+    const answered = q.order ? (R.ans['o'+R.sub]||[]).length===q.answer.length : a!==undefined;
+    card = `<div class="eyebrow">${ZH()?`第 ${R.sub+1} 题 / 共 5 题`:`Item ${R.sub+1} of 5`}</div>
+      <h2>${tx(q.t)}</h2>${inner}
+      ${answered?`<div class="act" style="margin-top:18px"><button class="btn" id="rgo">${
+        R.sub===4?(ZH()?'交卷，听讲评':'Finish and hear the review'):(ZH()?'下一题':'Next')}</button></div>`:''}`;
+  }
+
+  if (seg.kind==='result'){
+    let right=0;
+    L15.quiz.forEach((q,k)=>{
+      if (q.order){ const pk=R.ans['o'+k]||[]; if (pk.length===q.answer.length && pk.every((x,m)=>x===q.answer[m])) right++; }
+      else if (R.ans['q'+k]!==undefined && q.opts[R.ans['q'+k]].ok) right++;
+    });
+    R.right=right;
+    const mins=Math.max(1,Math.round((Date.now()-R.t0)/60000));
+    const ind=Math.min(6,2+right), cue=Math.min(8-ind,2), seen=8-ind-cue;
+    const tb = Object.keys(LC.TALKS).filter(k=>!/why$/.test(k)).reduce((n,k)=>n+LC.TALKS[k].beats.length,0);
+    card = `<div class="eyebrow">${ZH()?'结课':'Wrap-up'}</div>
+      <div style="text-align:center;padding:10px 0 18px">
+        <div style="font-size:48px;font-weight:600;color:var(--accent);letter-spacing:-.03em" class="num">${right}/5</div>
+        <div style="font-size:13px;color:var(--ink-3);margin-top:4px">${ZH()?'当堂小测':'Lesson check'}</div>
+      </div>
+      <div style="display:flex;height:7px;border-radius:4px;overflow:hidden;background:var(--bg-2)">
+        <i style="width:${ind/8*100}%;background:var(--pass)"></i>
+        <i style="width:${cue/8*100}%;background:var(--warn)"></i>
+        <i style="width:${seen/8*100}%;background:var(--ink-4)"></i>
+      </div>
+      <div style="display:flex;gap:16px;font-size:12px;color:var(--ink-3);margin-top:8px">
+        <span>${ZH()?`独立 ${ind}`:`unaided ${ind}`}</span>
+        <span>${ZH()?`需提示 ${cue}`:`prompted ${cue}`}</span>
+        <span>${ZH()?`只是听过 ${seen}`:`heard only ${seen}`}</span>
+      </div>
+      <p class="std" style="margin-top:10px">${ZH()
+        ? '一节课通常不会让八个词全部变成独立。剩下的会排进后面几课的复习。'
+        : 'One lesson rarely makes all eight independent. The rest go into later reviews.'}</p>
+      <div class="steps" style="margin-top:18px">
+        <div class="srow"><span class="srow-t">${ZH()?'老师讲解':'Explanations'}</span><span class="srow-c">${ZH()?`8 段 · ${tb} 句`:`8 segments · ${tb} lines`}</span></div>
+        <div class="srow"><span class="srow-t">${ZH()?'生词':'Vocabulary'}</span><span class="srow-c">${ZH()?'8 个已学':'8 learned'}</span></div>
+        <div class="srow"><span class="srow-t">${ZH()?'语法点':'Grammar'}</span><span class="srow-c">${ZH()?'2 个通过':'2 passed'}</span></div>
+        <div class="srow"><span class="srow-t">${ZH()?'用时':'Time'}</span><span class="srow-c num">${mins} ${ZH()?'分钟':'min'}</span></div>
+      </div>
+      <div class="act" style="margin-top:20px">
+        <button class="btn" id="rgo">${ZH()?'记上，去课后实践':'Log it and go practise'}</button>
+        <button class="link" id="rquit">${ZH()?'先回首页':'Back to the course home'}</button>
+      </div>`;
+  }
+
+  $('room').className='room on'; $('room').dataset.mode='work';
+  $('room').innerHTML = `${bg}${head('')}
+    <main class="room-main"><div class="room-work"><div class="room-card">${card}</div></div></main>`;
+
+  $('rx').onclick = closeRoom;
+  if ($('rhear')) $('rhear').onclick = ()=>{
+    const t = seg.kind==='words'  ? L15.words[R.sub].eg
+            : seg.kind==='listen' ? L15.listen[R.sub].play
+            : seg.kind==='speak'  ? L15.speak[0].lines[Math.min(R.ans.rep||0,2)].z
+            : L15.quiz[R.sub].play;
+    if (!rsay(t)) toast('这台设备没有中文语音。','No Chinese voice on this device.');
+  };
+  if ($('rwhy')) $('rwhy').onclick = ()=> rOpenTalk('l'+R.sub+'why', true);
+  if ($('rprev')) $('rprev').onclick = ()=>{ if (R.sub>0){ R.sub--; renderRoom(); } };
+  document.querySelectorAll('[data-chip]').forEach(b=>b.onclick=()=>{
+    if (R.ans['g'+seg.i]) return; R.ans['g'+seg.i]=b.dataset.chip; renderRoom(); });
+  document.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{
+    if (R.ans['l'+R.sub]!==undefined) return; R.ans['l'+R.sub]=+b.dataset.l; renderRoom(); });
+  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{
+    if (R.ans['q'+R.sub]!==undefined) return; R.ans['q'+R.sub]=+b.dataset.q; renderRoom(); });
+  document.querySelectorAll('[data-ord]').forEach(b=>b.onclick=()=>{
+    const k='o'+R.sub, cur=R.ans[k]||[];
+    if (cur.length>=L15.quiz[R.sub].answer.length) return;
+    R.ans[k]=cur.concat(b.dataset.ord); renderRoom(); });
+  if ($('rclr')) $('rclr').onclick = ()=>{ R.ans['o'+R.sub]=[]; renderRoom(); };
+  if ($('rmic')) rBindMic();
+  if ($('rquit')) $('rquit').onclick = ()=>{ S.taught=true; S.score=(R.right||0)+'/5'; closeRoom(); };
+  if ($('rgo')) $('rgo').onclick = ()=>{
+    if (seg.kind==='words'){ if (R.sub<L15.words.length-1){ R.sub++; renderRoom(); } else rNext(); return; }
+    if (seg.kind==='listen'){ if (R.sub<2){ R.sub++; renderRoom(); } else rNext(); return; }
+    if (seg.kind==='speak'){ if (R.sub<1){ R.sub++; R.ans.rep=0; renderRoom(); } else rNext(); return; }
+    if (seg.kind==='quiz'){ if (R.sub<4){ R.sub++; renderRoom(); } else rNext(); return; }
+    if (seg.kind==='drill'){ rNext(); return; }
+    S.taught=true; S.score=(R.right||0)+'/5'; closeRoom();
+    toast('记上了。课后实践开门了。','Logged. Practice is now open.');
+  };
+}
+function rBindMic(){
+  const el=$('rmic'), cap=$('rmicCap'); let t0=0, tm=null;
+  const start=e=>{ e.preventDefault(); t0=Date.now(); el.classList.add('rec');
+    cap.textContent = ZH()?'在听…':'Listening…'; tm=setTimeout(stop,6000); };
+  const stop=()=>{
+    if(!t0) return; clearTimeout(tm);
+    const d=Date.now()-t0; t0=0; el.classList.remove('rec');
+    if (d<400){ cap.textContent = ZH()?'按住说话':'Hold to speak'; return; }
+    if (rSeg().kind==='speak' && R.sub===0){
+      const k=(R.ans.rep||0), ok = k>0 || Math.random()>0.35;
+      R.ans.rep=k+1;
+      const T0 = TTone();
+      R.ans.repFb = ok ? { ok:true,  t: ZH()?T0.ok.zh:T0.ok.en }
+                       : { ok:false, t: ZH()?T0.no.zh:T0.no.en };
+    } else {
+      R.ans.freeFb = ZH()
+        ? '听清了。时间词放在动词前面，这一点你做对了。下面是我会怎么说：'
+        : 'Got it. You put the time word before the verb — that part is right. Here’s how I’d say it:';
+    }
+    renderRoom();
+  };
+  el.addEventListener('pointerdown', start);
+  el.addEventListener('pointerup', stop);
+  el.addEventListener('pointerleave', stop);
+  el.addEventListener('pointercancel', stop);
+}
+
+/* ============================================================
+   5. 浮层
+   ============================================================ */
+function openModal(html){ $('modalC').innerHTML = `<button class="modal-x" id="mx" aria-label="${ZH()?'关闭':'Close'}">×</button>${html}`; $('modal').classList.add('on'); $('mx').onclick=closeModal; $('modalC').scrollTop=0; }
+function closeModal(){ $('modal').classList.remove('on'); }
+
+function openStandard(){
+  openModal(`
+    <h3>${ZH()?'这门课按哪一套口径':'Which standard this course follows'}</h3>
+    <p>${ZH()
+      ? '新 HSK 采用三等九级。本课程按 <b>2025 年 HSK 考试大纲</b>排课。请注意：2021 年发布的《国际中文教育中文水平等级标准》把一级定为 500 词，那是教学框架，不是考试大纲；网上两个数字常被混用。'
+      : 'The new HSK has three stages and nine levels. This course follows the <b>2025 HSK exam syllabus</b>. Note that the 2021 teaching standard puts level 1 at 500 words — that is a teaching framework, not the exam syllabus, and the two figures are often confused online.'}</p>
+    <table>
+      <thead><tr><th>${ZH()?'等级':'Level'}</th><th>${ZH()?'累计词汇':'Words'}</th><th>${ZH()?'认读汉字':'Read'}</th><th>${ZH()?'书写汉字':'Write'}</th><th>${ZH()?'本课程课数':'Lessons'}</th></tr></thead>
+      <tbody>
+        ${HSK.map(h=>`<tr class="${h.lv===S.startLv?'cur':''}"><td>HSK ${h.lv}</td><td class="num">${h.words}</td><td class="num">${h.read}</td><td class="num">${h.write||'—'}</td><td class="num">${h.lessons}</td></tr>`).join('')}
+        <tr><td>HSK 7–9</td><td class="num">11000</td><td class="num">3088</td><td class="num">1200</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12.5px;color:var(--ink-3)">${ZH()
+      ? `${EXAM.label.zh}为 ${EXAM.date}，在那之前的常规考次仍考旧版 HSK 2.0。「本课程课数」是我们自己的排课，不是大纲规定。`
+      : `The ${EXAM.label.en.toLowerCase()} is on ${EXAM.date}; regular sittings before then still use HSK 2.0. The lesson counts are our own scheduling, not part of the syllabus.`}</p>`);
+}
+
+function openSyllabus(){
+  const cur = lv(S.startLv);
+  openModal(`
+    <h3>HSK ${cur.lv} ${ZH()?'课程表':'syllabus'}</h3>
+    <p style="margin-bottom:14px">${ZH()
+      ? `六个单元，共 ${cur.lessons} 课。学完掌握 ${cur.words} 个词、认读 ${cur.read} 个汉字。你在第 ${S.lesson} 课。`
+      : `Six units, ${cur.lessons} lessons. On completion: ${cur.words} words and ${cur.read} characters. You are on lesson ${S.lesson}.`}</p>
+    <div class="units">
+      ${UNITS.map(u=>{
+        const done = S.lesson > u.to, now = S.lesson>=u.from && S.lesson<=u.to;
+        return `<div class="unit ${now?'is-now':''}">
+          <span class="unit-n num">${ZH()?`第 ${u.from}–${u.to} 课`:`L${u.from}–${u.to}`}</span>
+          <span class="unit-b"><span class="unit-t">${ZH()?`第${CN[u.n]}单元　${u.zh}`:`Unit ${u.n} · ${u.en}`}</span><span class="unit-d">${tx(u.d)}</span></span>
+          <span class="unit-s ${done?'done':now?'now':'soon'}">${done?(ZH()?'已完成':'done'):now?(ZH()?'在学':'current'):(ZH()?'未开':'ahead')}</span>
+        </div>`;
+      }).join('')}
+    </div>`);
+}
+
+function openPreview(){
+  const L = lessonOf(S.lesson);
+  openModal(`
+    <h3>${ZH()?`第 ${L.no} 课讲什么`:`What’s in lesson ${L.no}`}</h3>
+    <p style="margin-bottom:6px">${tx(L.goal)}</p>
+    <p style="font-size:12.5px;color:var(--ink-3);margin-top:0">${tx(L.syllabus)}</p>
+    <h4 style="font-size:13px;margin:18px 0 8px">${ZH()?'生词':'Vocabulary'}</h4>
+    <div class="words">${L.words.map(w=>`<div class="word"><b>${w.z}</b><span>${w.p}</span></div>`).join('')}</div>
+    <h4 style="font-size:13px;margin:16px 0 8px">${ZH()?'语法点':'Grammar'}</h4>
+    <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7">
+      ${L.grammar.map(g=>`<li>${tx(g)}</li>`).join('')}
+    </ul>
+    <p style="font-size:12.5px;color:var(--ink-3);margin-top:16px">${ZH()
+      ? `另有听力 ${L.listen} 段、口语 ${L.speak} 项、当堂小测 ${L.quiz} 题。`
+      : `Plus ${L.listen} listening passages, ${L.speak} speaking tasks and a ${L.quiz}-item check.`}</p>`);
+}
+
+/* ============================================================
+   6. 分级面谈
+   ============================================================ */
+let step = 0;
+let D = { purpose:'', timeline:'', audio:null, glyphs:[], spoken:null, min:25 };
+
+function renderIntake(){
+  const total = 5;
+  const prog = `<div class="in-prog" aria-hidden="true">${[1,2,3,4,5].map(i=>`<i class="${i<=step?'on':''}"></i>`).join('')}</div>`;
+  let say={zh:'',en:''}, main='';
+
+  if (step === 0){
+    say = { zh: TE().intro.zh + '上课之前我们先做一次分级面谈，大约六分钟：我要弄清楚你学中文要用来做什么，和你现在到底在哪儿。然后我会给你定一个目标等级，并且告诉你我为什么这么定。',
+            en: TE().intro.en + ' Before we start, we do a placement interview — about six minutes: what you need Chinese for, and where you actually are. Then I set your target level and tell you exactly why.' };
+    main = `
+      <div class="in-kick">${ZH()?'入学面谈':'Placement interview'}</div>
+      <h1 class="in-q">${ZH()?'先弄清楚两件事，再开始上课。':'Two things to settle before we begin.'}</h1>
+      <p class="in-q-en">${ZH()
+        ? '你学中文要用来做什么，和你现在在哪儿。约六分钟，中途可以改答案。'
+        : 'What you need Chinese for, and where you are now. About six minutes; you can change your answers as we go.'}</p>
+      <div class="in-nav">
+        <button class="btn" id="go">${ZH()?'开始面谈':'Start'}</button>
+        <button class="link" id="skip">${ZH()?'先去看看剧场':'Look at the theater first'}</button>
+      </div>`;
+  }
+
+  if (step === 1){
+    say = { zh:'第一个问题。不要答「都想要」——用途不同，该学到的等级差很多，排课也完全不一样。',
+            en:'First question. Don’t say “all of them” — different purposes call for very different levels, and the schedule changes completely.' };
+    main = qBlock(ZH()?'你学中文，要用来做什么？':'What do you need Chinese for?',
+      ZH()?'选最主要的一个。这决定你的目标等级。':'Pick the main one. This sets your target level.',
+      PURPOSE.map(p=>({ id:p.id, t:ZH()?p.zh:p.en, d:tx(p.d), x:`HSK ${p.target}` })), D.purpose);
+  }
+
+  if (step === 2){
+    const d = daysToExam();
+    say = { zh:`有没有考期，排法不一样。提醒一句：${EXAM.date} 是 HSK 3.0 的首场正式考试，距今 ${d} 天；在那之前的常规考次考的还是旧版。`,
+            en:`Whether you have an exam date changes the schedule. One thing to know: ${EXAM.date} is the first official HSK 3.0 sitting, ${d} days from now. Regular sittings before then still use the old version.` };
+    main = qBlock(ZH()?'你打算什么时候考？':'When do you plan to sit an exam?',
+      ZH()?'没有考期也可以，课表照排，只是不设截止。':'No exam is fine — the schedule still runs, just without a deadline.',
+      TIMELINE.map(t=>({ id:t.id, t:ZH()?t.zh:t.en, d:tx(t.d) })), D.timeline);
+  }
+
+  if (step === 3){
+    say = { zh:'现在摸底。三道题，不用紧张，答错只是让我把起点放准一点。第一题听一句话，第二题看你认得哪些字，第三题你自己说。',
+            en:'Now the placement itself. Three items. Getting them wrong only helps me put your starting point in the right place. One listening, one on characters you recognise, one about speaking.' };
+    const [a,g,s] = [D.audio, D.glyphs, D.spoken];
+    main = `
+      <div class="in-kick">${ZH()?'摸底 · 共 3 题':'Placement · 3 items'}</div>
+      <h1 class="in-q">${ZH()?'你现在在哪儿？':'Where are you now?'}</h1>
+      <p class="in-q-en">${ZH()?'不用准备，凭现在的水平答。':'No preparation. Answer at the level you’re at right now.'}</p>
+
+      <div class="probe">
+        <p class="probe-q">${ZH()?'第 1 题 · 听下面这句话，它是什么意思？选项用学习者母语给出，所以这里是英文。':'Item 1 · Listen. What does this mean? The options are in your own language.'}</p>
+        <div class="audio">
+          <button id="playAudio" aria-label="${ZH()?'播放':'Play'}">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <div><span class="zh" id="audioZh">${ZH()?'（点播放听一句话）':'(press play)'}</span><small id="audioPy">${ZH()?'原型用设备合成音示意，正式版为老师真人音':'Device speech in this prototype; real teacher audio in the live build'}</small></div>
+        </div>
+        <div class="opts" style="max-width:none">
+          ${PROBE_AUDIO.opts.map((o,i)=>`<button class="opt ${a===i?'sel':''}" data-a="${i}">
+            <span class="opt-k num">${i+1}</span>
+            <span class="opt-b"><span class="opt-t" style="font-weight:500">${o.en}</span></span>
+          </button>`).join('')}
+        </div>
+      </div>
+
+      <div class="probe">
+        <p class="probe-q">${ZH()?'第 2 题 · 下面这些词，你认得哪几个？认得就点一下，一个都不认得也没关系。':'Item 2 · Which of these do you recognise? Tap the ones you know — none is a perfectly good answer.'}</p>
+        <div class="glyphs">
+          ${PROBE_GLYPHS.map((x,i)=>`<button class="glyph ${g.includes(i)?'on':''}" data-g="${i}">
+            <b>${x.z}</b><span>${g.includes(i)?(ZH()?'认得':'known'):'&nbsp;'}</span></button>`).join('')}
+        </div>
+      </div>
+
+      <div class="probe">
+        <p class="probe-q">${ZH()?'第 3 题 · 你开口说过中文吗？':'Item 3 · Have you spoken any Chinese?'}</p>
+        <div class="opts" style="max-width:none">
+          ${SPOKEN.map((x,i)=>`<button class="opt ${s===i?'sel':''}" data-s="${i}">
+            <span class="opt-k num">${i+1}</span>
+            <span class="opt-b"><span class="opt-t">${ZH()?x.zh:x.en}</span></span>
+          </button>`).join('')}
+        </div>
+      </div>
+
+      <div class="in-nav">
+        <button class="btn" id="go" ${(a===null||s===null)?'disabled style="opacity:.42;cursor:not-allowed"':''}>${ZH()?'交卷':'Submit'}</button>
+        <span class="link" style="text-decoration:none">${(a===null||s===null)?(ZH()?'第 1、3 题要答':'Items 1 and 3 are required'):''}</span>
+      </div>`;
+  }
+
+  if (step === 4){
+    say = { zh:'最后一个。说实话——我按你报的时间排课，报多了排出来的课表你撑不住，三周就会停。',
+            en:'Last one. Be honest. I build the schedule around this number; overstate it and you’ll stop within three weeks.' };
+    main = qBlock(ZH()?'每天你能拿出多少时间？':'How much time can you give this each day?',
+      ZH()?'一节课的长度按这个定。':'This sets the length of a lesson.',
+      MINUTES.map(m=>({ id:String(m.id), t:ZH()?m.zh:m.en,
+        d: ZH()?`约 ${Math.round(m.rate*7*10)/10} 课 / 周`:`about ${Math.round(m.rate*7*10)/10} lessons a week` })), String(D.min));
+  }
+
+  if (step === 5){
+    const v = verdict();
+    say = { zh:`定下来了：起点 HSK ${v.start}，目标 HSK ${v.target}。理由我写在右边，你可以不同意——目标等级随时能调，但起点我建议按摸底来。`,
+            en:`Here it is: you start at HSK ${v.start} and aim for HSK ${v.target}. My reasoning is on the right. You may disagree — the target can be changed any time, but I’d keep the starting point where the placement puts it.` };
+    main = `
+      <div class="in-kick">${ZH()?'分级结果':'Placement result'}</div>
+      <div class="verdict">
+        <div class="v-head">
+          <div class="t">${ZH()?'你的目标等级':'Your target level'}</div>
+          <div class="lv">HSK ${v.target} <s>${ZH()?`从 HSK ${v.start} 起`:`starting at HSK ${v.start}`}</s></div>
+          <div class="sub">${ZH()?lv(v.target).use.zh:lv(v.target).use.en}</div>
+        </div>
+        <div class="v-body">
+          <ul class="v-why">
+            <li><span class="n num">1</span><span>${v.why1}</span></li>
+            <li><span class="n num">2</span><span>${v.why2}</span></li>
+            <li><span class="n num">3</span><span>${v.why3}</span></li>
+          </ul>
+          <div class="v-plan">
+            <div class="v-plan-r"><span>${ZH()?'课程口径':'Standard'}</span><b>${ZH()?'HSK 3.0 · 2025 年考试大纲':'HSK 3.0 · 2025 exam syllabus'}</b></div>
+            <div class="v-plan-r"><span>${ZH()?'每天':'Each day'}</span><b>${D.min} ${ZH()?'分钟，一课':'min, one lesson'}</b></div>
+            <div class="v-plan-r"><span>${ZH()?'到目标共':'To target'}</span><b class="num">${v.totalLessons} ${ZH()?'课':'lessons'}</b></div>
+            <div class="v-plan-r"><span>${ZH()?'预计用时':'Estimated'}</span><b>${v.weeks} ${ZH()?'周':'weeks'}</b></div>
+          </div>
+          <div class="v-exam">${v.examNote}</div>
+          <div class="in-nav">
+            <button class="btn" id="go">${ZH()?'接受，开始上课':'Accept and begin'}</button>
+            <button class="link" id="lower">${ZH()?'目标定低一点':'Aim lower'}</button>
+            <button class="link" id="back">${ZH()?'我改一下答案':'Change my answers'}</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  $('root').innerHTML = `
+    <div class="intake">
+      <div class="in-top">
+        <div class="brand"><div class="brand-mk" aria-hidden="true">中</div>
+          <div><b>${ZH()?'中文课':'Chinese Course'}</b><span>${ZH()?'入学分级面谈':'Placement interview'}</span></div></div>
+        <div class="top-sp"></div>
+        ${step>0?prog:''}
+        <button class="tbtn" id="btnLang" aria-pressed="${!ZH()}">${ZH()?'EN':'中文'}</button>
+      </div>
+      <div class="in-body"><div class="in-grid">
+        ${dhPanel(ZH()?say.zh:say.en, say.en, { listening: step===3 })}
+        <div class="in-main">${main}</div>
+      </div></div>
+    </div>`;
+
+  bindDh();
+  typeOut($('dhText'), ZH()?say.zh:say.en);
+  $('btnLang').onclick = ()=>{ S.lang = ZH()?'en':'zh'; renderIntake(); };
+  if ($('skip')) $('skip').onclick = ()=> location.href='theater.html';
+  if ($('back')) $('back').onclick = ()=>{ step=1; renderIntake(); };
+  if ($('lower')) $('lower').onclick = ()=>{
+    const v=verdict();
+    if (v.target>v.start){ D.lower=(D.lower||0)+1; renderIntake(); toast('调低一级。随时还能调回来。','Lowered by one level. You can raise it again any time.'); }
+    else toast('不能再低了——这已经是你的起点。','Can’t go lower; that is already your starting point.');
+  };
+  document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{ D.audio=+b.dataset.a; renderIntake(); });
+  document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.g, k=D.glyphs.indexOf(i);
+    if (k<0) D.glyphs.push(i); else D.glyphs.splice(k,1);
+    renderIntake();
+  });
+  document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{ D.spoken=+b.dataset.s; renderIntake(); });
+  document.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>{
+    const v=b.dataset.opt;
+    if (step===1) D.purpose=v;
+    if (step===2) D.timeline=v;
+    if (step===4) D.min=parseInt(v,10);
+    step++; renderIntake();
+  });
+  if ($('playAudio')) $('playAudio').onclick = ()=>{
+    $('audioZh').textContent = ZH()?'（已播放一次）':'(played once)';
+    try{
+      const u=new SpeechSynthesisUtterance(PROBE_AUDIO.play);
+      u.lang='zh-CN'; u.rate=.85; speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }catch(_){ toast('这台设备没有中文语音。正式版用老师的录音。','No Chinese voice on this device. The live build uses the teacher’s own audio.'); }
+  };
+  if ($('go')) $('go').onclick = ()=>{
+    if (step===5){ commit(); return; }
+    if (step===3 && (D.audio===null||D.spoken===null)) return;
+    step++; renderIntake();
+  };
+}
+
+function qBlock(q, sub, opts, selected){
+  return `
+    <div class="in-kick">${ZH()?`第 ${step} 步，共 5 步`:`Step ${step} of 5`}</div>
+    <h1 class="in-q">${q}</h1>
+    <p class="in-q-en">${sub}</p>
+    <div class="opts">
+      ${opts.map((o,i)=>`<button class="opt ${selected===o.id?'sel':''}" data-opt="${esc(o.id)}">
+        <span class="opt-k num">${i+1}</span>
+        <span class="opt-b"><span class="opt-t">${o.t}</span>${o.d?`<span class="opt-d">${o.d}</span>`:''}</span>
+        ${o.x?`<span class="opt-x">${o.x}</span>`:''}
+      </button>`).join('')}
+    </div>`;
+}
+
+/* 老师的判定 */
+function verdict(){
+  const p = PURPOSE.find(x=>x.id===D.purpose) || PURPOSE[0];
+  const gl = D.glyphs.map(i=>PROBE_GLYPHS[i]);
+  const topLv = gl.length ? Math.max(...gl.map(g=>g.lv)) : 0;
+  const sp = SPOKEN[D.spoken] || SPOKEN[0];
+  const heard = D.audio === PROBE_AUDIO.opts.findIndex(o=>o.ok);
+
+  let start = 1;
+  if (gl.length >= 6 && topLv >= 2 && sp.score >= 2 && heard) start = 3;
+  else if (gl.length >= 4 && sp.score >= 1) start = 2;
+
+  let target = Math.max(start, p.target - (D.lower||0));
+  if (target < start) target = start;
+
+  const totalLessons = lessonsBetween(start, target);
+  const rate = (MINUTES.find(m=>m.id===D.min)||MINUTES[1]).rate;
+  const weeks = Math.max(1, Math.round(totalLessons / (rate*7)));
+
+  const why1 = ZH()
+    ? `你说学中文是为了<em>${p.zh}</em>——${p.d.zh}。这类用途通常要到 <em>HSK ${p.target}</em> 才够用。`
+    : `You said your purpose is <em>${p.en.toLowerCase()}</em> — ${p.d.en.toLowerCase()}. That normally needs <em>HSK ${p.target}</em>.`;
+  const why2 = ZH()
+    ? `摸底：听辨题${heard?'答对了':'没答对'}，认得 <em>${gl.length} / 8</em> 个词${topLv>=2?`（含 HSK ${topLv} 的词）`:''}，口语是「${sp.zh}」。起点放在 <em>HSK ${start}</em>。`
+    : `Placement: you ${heard?'got':'missed'} the listening item, recognised <em>${gl.length} of 8</em> words${topLv>=2?` (including HSK ${topLv} items)`:''}, and your speaking is “${sp.en.toLowerCase()}”. Starting point: <em>HSK ${start}</em>.`;
+  const why3 = ZH()
+    ? `按每天 ${D.min} 分钟，一天一课，到 HSK ${target} 共 <em>${totalLessons} 课</em>，大约 <em>${weeks} 周</em>。`
+    : `At ${D.min} minutes a day, one lesson a day, HSK ${target} is <em>${totalLessons} lessons</em> away — roughly <em>${weeks} weeks</em>.`;
+
+  /* 考期推算 */
+  const d = daysToExam();
+  const byExam = Math.floor(d * rate);
+  let reach = start, left = byExam;
+  while (reach <= 6 && left > lv(reach).lessons){ left -= lv(reach).lessons; reach++; }
+  const pct = Math.round(left / lv(Math.min(6,reach)).lessons * 100);
+  let examNote;
+  if (D.timeline === 'exam1213'){
+    examNote = ZH()
+      ? `你要考 <b>${EXAM.date}</b> 那场（${EXAM.label.zh}，还有 <b>${d} 天</b>）。按每天 ${D.min} 分钟，到考试那天你大约走到 <b>HSK ${reach} 的 ${pct}%</b>。${pct<80
+          ? `也就是说 HSK ${reach} 还没学完。两条路：这次稳妥报 <b>HSK ${Math.max(1,reach-1)}</b>，或者把每天时间加到 45 分钟，去赶 HSK ${reach}。`
+          : `够报 <b>HSK ${reach}</b>，但最后两周要留出来做真题。`}`
+      : `You want the <b>${EXAM.date}</b> sitting (${EXAM.label.en}, <b>${d} days</b> away). At ${D.min} minutes a day you’ll be about <b>${pct}% through HSK ${reach}</b> by then. ${pct<80
+          ? `That means HSK ${reach} won’t be finished. Two options: sit <b>HSK ${Math.max(1,reach-1)}</b> safely, or go to 45 minutes a day and push for HSK ${reach}.`
+          : `Enough for <b>HSK ${reach}</b>, but keep the last two weeks for past papers.`}`;
+  } else if (D.timeline === 'none'){
+    examNote = ZH()
+      ? `你不打算考试，所以课表没有截止日期。等级仍然按大纲走——它是衡量进度的尺子，不只是考试用的。`
+      : `No exam, so the schedule has no deadline. We still follow the levels: they are the ruler for progress, not just an exam format.`;
+  } else {
+    examNote = ZH()
+      ? `按这个进度，<b>${weeks} 周</b>后你到 HSK ${target}。真要报考，提前两个月告诉我，我把最后一段换成真题训练。`
+      : `At this pace you reach HSK ${target} in <b>${weeks} weeks</b>. If you decide to sit the exam, tell me two months ahead and I’ll switch the final stretch to past papers.`;
+  }
+
+  return { start, target, totalLessons, weeks, why1, why2, why3, examNote };
+}
+
+function commit(){
+  const v = verdict();
+  S.purpose = D.purpose; S.timeline = D.timeline; S.min = D.min;
+  S.startLv = v.start; S.target = v.target;
+  S.probe = [ (D.audio===PROBE_AUDIO.opts.findIndex(o=>o.ok))?1:0, D.glyphs.length, D.spoken||0 ].join(',');
+  S.lesson = 15; S.taught = false; S.done = true;
+  toast('分级定了。第 15 课在等你——这是你的课表起点示例。','Placement set. Lesson 15 is waiting; it is the sample starting point in this prototype.');
+  setTimeout(()=>{ renderHome(); window.scrollTo(0,0); }, 900);
+}
+
+/* ============================================================
+   7. 演示与启动
+   ============================================================ */
+function bindDemo(){
+  $('demoX').onclick = ()=> $('demo').classList.remove('on');
+  $('dDone').onclick = ()=>{ S.taught=true; renderHome(); toast('第 15 课记上了。课后实践开门了。','Lesson 15 logged. Practice is now open.'); };
+  $('dL6').onclick  = ()=>{ S.lesson=6;  S.taught=false; renderHome(); window.scrollTo(0,0); };
+  $('dL33').onclick = ()=>{ S.lesson=33; S.taught=false; renderHome(); window.scrollTo(0,0); };
+  $('dStage').onclick = ()=> location.href='theater.html';
+  $('dReset').onclick = ()=>{
+    ['cc.done','cc.purpose','cc.timeline','cc.min','cc.startLv','cc.target','cc.lesson','cc.taught','cc.probe','cc.score','cc.stageDone','cc.teacher','cc.lsn']
+      .forEach(k=>LS.del(k));
+    step=0; D={ purpose:'', timeline:'', audio:null, glyphs:[], spoken:null, min:25 };
+    $('demo').classList.remove('on'); renderIntake(); window.scrollTo(0,0);
+  };
+}
+document.addEventListener('keydown', e=>{ if (e.key==='Escape'){ closeModal(); $('demo').classList.remove('on'); } });
+$('modal').addEventListener('click', e=>{ if (e.target===$('modal')) closeModal(); });
+
+(function init(){
+  bindDemo();
+  let back=false;
+  if (LS.get('cc.stageDone','')==='1'){ LS.del('cc.stageDone'); if (S.done){ S.lesson=Math.min(lv(S.startLv).lessons,S.lesson+1); S.taught=false; back=true; } }
+  let resumed = null;
+  if (S.teacher && S.done && !S.taught) resumed = restoreRoom();
+  if (!S.teacher) renderPickD(); else if (S.done) renderHome(); else renderIntake();
+  if (LC.smokeOn()) return runSmokeD();
+  if (resumed !== null){ renderRoom(); setTimeout(()=>toast(
+    `接着上，从第 ${resumed+1} / ${LC.SEGS.length} 段。`,
+    `Picking up where you left off — part ${resumed+1} of ${LC.SEGS.length}.`), 500); }
+  if (!LS.persists) setTimeout(()=>toast(
+    '这个环境不保存进度：浏览器禁用了本地存储，刷新后会从头开始。',
+    'This environment can’t save progress — local storage is blocked, so a reload starts over.'), 1800);
+  if (back) setTimeout(()=>toast(`实践记上了。明天是第 ${S.lesson} 课。`,`Practice logged. Tomorrow is lesson ${S.lesson}.`), 600);
+})();
+
+/* index.html?smoke=1 —— 真点一次「上课」，再把 15 段、全部讲解与九位老师走一遍 */
+function runSmokeD(){
+  const log=[], ok=(k,e)=>log.push((e?'✗':'✓')+' '+k+(e?' — '+e.message:''));
+  const ANS={g0:'几',g1:'星期',l0:1,l1:2,l2:1,rep:3,repFb:{ok:true,t:'ok'},freeFb:'ok',
+             q0:0,q1:1,o2:['明天','下午','见'],q3:0,q4:0};
+  S.lang='zh'; S.teacher=S.teacher||'fang'; S.done=true; S.purpose='work';
+  S.min=25; S.startLv=1; S.target=4; S.lesson=15; S.taught=false; S.probe='1,3,1';
+  renderHome();
+  try{ $('btnTeach').click(); ok('点击「上课」'); }catch(e){ ok('点击「上课」',e); }
+  try{ if(!document.querySelector('.room.on')) throw new Error('课堂没有打开'); ok('课堂已打开'); }
+  catch(e){ ok('课堂已打开',e); }
+  LC.SEGS.forEach((sg,i)=>{
+    try{ R={seg:i,sub:0,ans:Object.assign({},ANS),t0:Date.now(),tk:null,right:0}; renderRoom();
+         if(!document.querySelector('.room.on')) throw new Error('没有渲染');
+         ok('第'+i+'段 '+sg.kind+(sg.talk?'/'+sg.talk:'')); }
+    catch(e){ ok('第'+i+'段 '+sg.kind,e); }
+  });
+  Object.keys(LC.TALKS).forEach(id=>{
+    try{ const T=LC.TALKS[id];
+         R={seg:0,sub:0,ans:{},t0:Date.now(),tk:null,right:0}; rOpenTalk(id); R.tk.paused=true;
+         for(let b=0;b<T.beats.length;b++){ R.tk.i=b; renderRoom(); }
+         R.tk.done=true; renderRoom();
+         if(T.check){ R.tk.picked=0; renderRoom();
+           if(!document.querySelector('.room-chk')) throw new Error('段末一问没出现'); }
+         ok('讲解 '+id+'（'+T.beats.length+' 句）'); }
+    catch(e){ ok('讲解 '+id,e); }
+  });
+  LC.TEACHERS.forEach(t=>{
+    try{ S.teacher=t.id; R=null; renderHome();
+         R={seg:4,sub:0,ans:{},t0:Date.now(),tk:null,right:0}; rOpenTalk('t2a'); R.tk.paused=true; renderRoom();
+         ok('老师 '+t.name.zh); }
+    catch(e){ ok('老师 '+t.name.zh,e); }
+  });
+  clearTimeout(roomTimer); document.body.style.overflow='';
+  LC.smokeReport('桌面端冒烟', log);
+}
+</script>
+</body>
+</html>

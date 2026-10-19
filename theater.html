@@ -1,0 +1,3134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c8442f'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='%23ffeede' font-family='serif'%3E%E6%B5%B7%3C/text%3E%3C/svg%3E" />
+<title>AI Chinese 生活剧场 — 沉浸式原型 v2</title>
+<meta name="description" content="AI Chinese 生活剧场 ·《海棠街》全屏沉浸式中文学习剧场原型（与经典原型平行）" />
+<style>
+  /* ============================================================
+     AI Chinese 生活剧场（海棠街 · 第一季 邻里夜市） 沉浸式原型 v2
+     与经典原型平行：右上角开关可随时切换
+     ============================================================ */
+  :root{
+    --ink:#0a090d;
+    --ink-2:#100e15;
+    --paper:#f7f0e4;
+    --paper-2:rgba(247,240,228,.74);
+    --paper-3:rgba(247,240,228,.46);
+    --amber:#f0b464;
+    --amber-deep:#c9833c;
+    --seal:#c8442f;
+    --jade:#84c3ab;
+    --violet:#8d7bf0;
+    --lh:#e9c98d;      /* 林浩 */
+    --chen:#e2a969;    /* 陈叔 */
+    --zhou:#9ec9a8;    /* 周远 */
+    --alan:#ef9d84;    /* 阿岚 */
+    --panda:#a99cf5;   /* 熊猫老师 */
+    --chrome-h:54px;
+    --bar:6.4vh;
+    --serif:"Songti SC","STSong","Source Han Serif SC","Noto Serif SC","Songti TC",Georgia,"Times New Roman",serif;
+    --sans:"PingFang SC","Hiragino Sans GB","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+    --ease-out:cubic-bezier(.16,.84,.28,1);
+    --ease-inout:cubic-bezier(.6,.02,.2,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:#050508;color:var(--paper);font-family:var(--sans);
+    overflow:hidden;-webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+  ::selection{background:rgba(240,180,100,.32)}
+
+  /* ---------------- 顶部 chrome（含右上角模式开关） ---------------- */
+  .chrome{
+    position:fixed;left:0;right:0;top:0;height:var(--chrome-h);z-index:90;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:0 14px 0 16px;
+    background:linear-gradient(180deg,rgba(6,5,10,.92),rgba(6,5,10,.62) 70%,rgba(6,5,10,0));
+    backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);
+    border-bottom:1px solid rgba(255,255,255,.06);
+    transition:opacity .5s var(--ease-out),transform .5s var(--ease-out);
+  }
+  body[data-mode="classic"] .chrome{
+    background:#0b0a11;border-bottom-color:rgba(255,255,255,.09);
+  }
+  .chrome.is-dim{opacity:0;transform:translateY(-10px);pointer-events:none}
+  .chrome-brand{display:flex;align-items:center;gap:11px;min-width:0}
+  .seal{
+    width:30px;height:30px;border-radius:7px;flex:0 0 auto;
+    background:linear-gradient(160deg,#d2543c,#a8301f);
+    color:#ffeede;font-family:var(--serif);font-weight:700;font-size:12.5px;line-height:1.02;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    letter-spacing:0;
+    box-shadow:0 4px 14px rgba(200,68,47,.38), inset 0 0 0 1px rgba(255,255,255,.16);
+    padding:2px;
+  }
+  .chrome-title{display:flex;flex-direction:column;line-height:1.16;min-width:0}
+  .chrome-title b{font-size:13.5px;font-weight:650;letter-spacing:.16em;white-space:nowrap}
+  .chrome-title span{font-size:10px;color:var(--paper-3);letter-spacing:.14em;white-space:nowrap;text-transform:uppercase}
+  .chrome-right{display:flex;align-items:center;gap:8px}
+
+  /* 模式开关（右上角） */
+  .mode-switch{
+    display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;
+    background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.09);
+  }
+  .mode-switch button{
+    position:relative;border-radius:999px;padding:7px 13px;font-size:11.5px;font-weight:600;
+    letter-spacing:.06em;color:rgba(247,240,228,.62);transition:.24s var(--ease-out);white-space:nowrap;
+  }
+  .mode-switch button small{font-size:8.5px;letter-spacing:.08em;opacity:.6;margin-left:5px}
+  .mode-switch button[aria-pressed="true"]{
+    background:linear-gradient(180deg,#f4c885,#d99c4c);color:#2a1c08;
+    box-shadow:0 4px 14px rgba(214,158,80,.3);
+  }
+  .mode-switch button[aria-pressed="true"] small{opacity:.72}
+  .mode-switch button:hover[aria-pressed="false"]{color:#fff;background:rgba(255,255,255,.07)}
+
+  .icon-btn{
+    width:32px;height:32px;border-radius:10px;display:grid;place-items:center;
+    background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+    font-size:11px;font-weight:650;color:rgba(247,240,228,.72);transition:.2s var(--ease-out);
+  }
+  .icon-btn:hover{background:rgba(255,255,255,.13);color:#fff;transform:translateY(-1px)}
+  .icon-btn[aria-pressed="true"]{background:rgba(240,180,100,.2);color:var(--amber);box-shadow:inset 0 0 0 1px rgba(240,180,100,.45)}
+  .icon-btn svg{width:15px;height:15px;display:block}
+  .chrome-link{
+    font-size:10.5px;letter-spacing:.06em;color:var(--paper-3);text-decoration:none;
+    padding:6px 4px;white-space:nowrap;transition:.2s;
+  }
+  .chrome-link:hover{color:var(--amber)}
+  .chrome-link.back-home{
+    color:var(--paper-2);border:1px solid rgba(247,240,228,.2);border-radius:999px;
+    padding:5px 11px;font-size:11px;letter-spacing:.02em;
+  }
+  .chrome-link.back-home:hover{border-color:var(--amber);color:var(--amber)}
+  body[data-mode="theater"] .only-classic{display:none}
+  body[data-mode="classic"] .only-theater{display:none}
+
+  /* ---------------- 舞台 ---------------- */
+  .theater{position:fixed;inset:0;z-index:1;overflow:hidden;background:#05050a}
+  body[data-mode="classic"] .theater{display:none}
+  .stage-layer{position:absolute;inset:0;opacity:0;transition:opacity 1.25s var(--ease-inout)}
+  .stage-layer.on{opacity:1}
+  .stage-layer img{
+    width:100%;height:100%;object-fit:cover;object-position:50% 34%;
+    transform:scale(1.06) translate3d(0,0,0);
+    will-change:transform,filter;
+    filter:saturate(.92) contrast(1.03) brightness(.9);
+  }
+  .grade{position:absolute;inset:0;pointer-events:none;transition:background 1.4s var(--ease-inout),opacity 1.4s}
+  .stage-layer.contain{background-size:cover;background-position:50% 30%;background-repeat:no-repeat}
+  .stage-layer.contain::before{content:"";position:absolute;inset:0;background:rgba(6,5,10,.4);backdrop-filter:blur(30px) saturate(1.05);-webkit-backdrop-filter:blur(30px) saturate(1.05)}
+  .stage-layer.contain img{object-fit:contain;position:relative;z-index:1;filter:saturate(.96) contrast(1.02) brightness(1.02)}
+  .grade.dusk{background:linear-gradient(180deg,rgba(38,22,50,.5),rgba(10,6,12,.28) 42%,rgba(120,58,22,.34)),radial-gradient(ellipse 70% 50% at 62% 32%,rgba(255,178,104,.3),transparent 66%)}
+  .grade.hall{background:linear-gradient(180deg,rgba(20,26,44,.56),rgba(8,8,14,.36) 45%,rgba(64,44,28,.42)),radial-gradient(ellipse 60% 44% at 34% 26%,rgba(255,206,150,.24),transparent 62%)}
+  .grade.stage{background:linear-gradient(180deg,rgba(46,32,74,.62),rgba(10,7,16,.5) 52%,rgba(20,12,30,.66)),radial-gradient(ellipse 52% 40% at 50% 30%,rgba(214,190,255,.3),transparent 64%)}
+  .grade.square{background:linear-gradient(180deg,rgba(56,32,18,.5),rgba(12,8,10,.34) 44%,rgba(140,66,24,.36)),radial-gradient(ellipse 66% 46% at 46% 34%,rgba(255,180,110,.28),transparent 64%)}
+  .grade.market{background:linear-gradient(180deg,rgba(22,26,48,.56),rgba(7,6,12,.42) 46%,rgba(158,66,26,.4)),radial-gradient(ellipse 80% 52% at 50% 40%,rgba(255,168,96,.3),transparent 68%)}
+  .grade.shop{background:linear-gradient(180deg,rgba(30,30,26,.48),rgba(8,7,10,.34) 46%,rgba(120,52,34,.4)),radial-gradient(ellipse 60% 46% at 44% 32%,rgba(255,186,140,.26),transparent 64%)}
+
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:
+      radial-gradient(ellipse 118% 96% at 50% 44%,transparent 34%,rgba(3,3,6,.5) 78%,rgba(3,3,6,.92) 100%),
+      linear-gradient(180deg,rgba(3,3,6,.72),transparent 24%,transparent 58%,rgba(3,3,6,.86));
+  }
+  .spot{
+    position:absolute;left:-30%;top:-20%;width:160%;height:150%;pointer-events:none;
+    background:radial-gradient(ellipse 30% 40% at 50% 50%,rgba(255,214,150,.3),rgba(255,196,120,.1) 42%,transparent 72%);
+    mix-blend-mode:screen;opacity:.85;
+    transform:translate3d(0,0,0);transition:transform 1.6s var(--ease-inout),opacity 1s;
+  }
+  .spot.dim{opacity:.34}
+  .grain{
+    position:absolute;inset:-60%;pointer-events:none;opacity:.16;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='180' height='180' filter='url(%23n)' opacity='.55'/></svg>");
+    animation:grain 1.1s steps(3,end) infinite;
+  }
+  @keyframes grain{
+    0%{transform:translate3d(0,0,0)}
+    33%{transform:translate3d(-2%,1.4%,0)}
+    66%{transform:translate3d(1.6%,-1.2%,0)}
+    100%{transform:translate3d(0,0,0)}
+  }
+  .flicker{position:absolute;inset:0;pointer-events:none;background:rgba(255,222,180,.05);opacity:0;mix-blend-mode:screen;animation:flick 7s ease-in-out infinite}
+  @keyframes flick{0%,96%,100%{opacity:0}98%{opacity:.05}99%{opacity:.015}}
+
+  /* 漂浮的光点 / 灯笼尘屑 */
+  .motes{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+  .mote{
+    position:absolute;bottom:-6vh;width:3px;height:3px;border-radius:50%;
+    background:rgba(255,206,142,.85);box-shadow:0 0 10px 2px rgba(255,190,120,.42);
+    opacity:0;animation:drift linear infinite;
+  }
+  @keyframes drift{
+    0%{transform:translate3d(0,0,0) scale(.6);opacity:0}
+    12%{opacity:.85}
+    70%{opacity:.6}
+    100%{transform:translate3d(var(--dx,20px),-108vh,0) scale(1.05);opacity:0}
+  }
+
+  /* 遮幅黑边 */
+  .bar{position:absolute;left:0;right:0;height:var(--bar);background:#040407;z-index:22;transition:height 1.1s var(--ease-inout)}
+  .bar.top{top:0}
+  .bar.bottom{bottom:0}
+  body.cinema-tight{--bar:12.5vh}
+
+  /* 转场遮罩 / 光圈 */
+  .veil{position:absolute;inset:0;z-index:30;pointer-events:none;opacity:0;transition:opacity .42s var(--ease-inout);
+    background:radial-gradient(circle at var(--vx,50%) var(--vy,42%),rgba(4,4,7,.86),#040407 62%)}
+  .veil.on{opacity:1;transition:opacity .38s var(--ease-inout)}
+
+  /* ---------------- HUD ---------------- */
+  .hud{position:absolute;inset:0;z-index:40;pointer-events:none}
+  .hud > *{pointer-events:auto}
+
+  /* 剧集卡（左上） */
+  .episode-card{
+    position:absolute;left:22px;top:calc(var(--bar) + 16px);
+    display:flex;flex-direction:column;gap:3px;
+    padding-left:12px;border-left:2px solid rgba(240,180,100,.55);
+    opacity:.92;transition:.6s var(--ease-out);
+  }
+  .episode-card b{font-size:12px;letter-spacing:.2em;font-weight:600;color:var(--paper-2)}
+  .episode-card span{font-size:10px;letter-spacing:.16em;color:var(--paper-3)}
+  .episode-card em{font-family:var(--serif);font-style:normal;font-size:19px;letter-spacing:.1em;color:var(--amber);margin-top:2px}
+
+  /* 幕目录（左侧） */
+  .act-rail{
+    position:absolute;left:22px;top:50%;transform:translateY(-50%);
+    display:flex;flex-direction:column;gap:2px;align-items:flex-start;
+    opacity:.5;transition:opacity .4s var(--ease-out);
+  }
+  .act-rail:hover{opacity:1}
+  .act-rail button{
+    display:flex;align-items:center;gap:9px;padding:5px 8px 5px 0;border-radius:8px;
+    font-size:10.5px;letter-spacing:.12em;color:var(--paper-3);transition:.25s var(--ease-out);
+  }
+  .act-rail button .tick{width:16px;height:1px;background:rgba(247,240,228,.3);transition:.3s var(--ease-out)}
+  .act-rail button:hover{color:var(--paper)}
+  .act-rail button.done{color:rgba(247,240,228,.66)}
+  .act-rail button.done .tick{background:rgba(240,180,100,.6)}
+  .act-rail button.active{color:var(--amber);transform:translateX(3px)}
+  .act-rail button.active .tick{width:26px;background:var(--amber)}
+  .act-rail button.locked{opacity:.45}
+  .act-rail button .zh-mini{font-family:var(--serif);font-size:11.5px}
+
+  /* 字幕带 */
+  .subs{
+    position:absolute;left:50%;bottom:calc(var(--bar) + 30px);transform:translateX(-50%) translateY(10px);
+    width:min(93vw,1060px);text-align:center;opacity:0;transition:opacity .5s var(--ease-out),transform .5s var(--ease-out);
+  }
+  .subs.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .subs .who{
+    display:inline-flex;align-items:center;gap:9px;margin-bottom:12px;
+    font-size:11px;letter-spacing:.26em;color:var(--who,var(--amber));text-transform:uppercase;
+  }
+  .subs .who::before,.subs .who::after{content:"";width:22px;height:1px;background:currentColor;opacity:.5}
+  .subs .who b{font-family:var(--serif);font-size:14px;letter-spacing:.22em;font-weight:600}
+  .subs .zh{
+    font-family:var(--serif);font-size:clamp(26px,3.5vw,50px);line-height:1.36;letter-spacing:.03em;
+    text-shadow:0 3px 34px rgba(0,0,0,.9),0 1px 4px rgba(0,0,0,.7);font-weight:500;
+  }
+  .subs .zh span,.reveal-txt span{display:inline-block;opacity:0;transform:translateY(.42em);animation:charIn .62s var(--ease-out) forwards;animation-delay:calc(var(--i)*42ms)}
+  @keyframes charIn{to{opacity:1;transform:translateY(0)}}
+  .subs .py{
+    margin-top:11px;color:rgba(240,180,100,.92);font-size:clamp(12.5px,1.05vw,16.5px);
+    letter-spacing:.08em;opacity:0;transition:opacity .6s var(--ease-out) .3s;
+  }
+  .subs .en{
+    margin-top:7px;color:rgba(247,240,228,.56);font-size:clamp(13px,1.05vw,17px);letter-spacing:.02em;
+    opacity:0;transition:opacity .6s var(--ease-out) .45s;
+  }
+  .subs.reveal .py,.subs.reveal .en{opacity:1}
+  .subs.reveal .en{opacity:.5}
+  body.no-pinyin .subs .py{display:none}
+  body.no-english .subs .en{display:none}
+
+  /* 旁白 */
+  .narration{
+    position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);
+    width:min(84vw,900px);text-align:center;opacity:0;transition:opacity .7s var(--ease-out),transform .7s var(--ease-out);
+  }
+  .narration.on{opacity:1;transform:translate(-50%,-50%) translateY(0)}
+  .narration::before{content:"";display:block;width:44px;height:1px;background:rgba(240,180,100,.5);margin:0 auto 20px}
+  .narration .reveal-txt{font-family:var(--serif);}
+  .narration .n-zh{font-family:var(--serif);font-size:clamp(19px,2.15vw,31px);line-height:1.72;letter-spacing:.06em;color:rgba(247,240,228,.94);text-shadow:0 2px 22px rgba(0,0,0,.85)}
+  .narration .n-en{margin-top:13px;font-size:clamp(11.5px,.95vw,14.5px);letter-spacing:.06em;color:rgba(247,240,228,.44)}
+  body.no-english .narration .n-en{display:none}
+
+  /* 幕卡 */
+  .act-card{
+    position:absolute;inset:0;z-index:44;display:grid;place-items:center;pointer-events:none;
+    opacity:0;transition:opacity .8s var(--ease-out);
+  }
+  .act-card.on{opacity:1}
+  .act-card .inner{display:flex;align-items:center;gap:34px;transform:translateY(12px);transition:transform 1.1s var(--ease-out)}
+  .act-card.on .inner{transform:translateY(0)}
+  .act-card .vertical{
+    writing-mode:vertical-rl;font-family:var(--serif);font-size:clamp(38px,4.6vw,68px);
+    letter-spacing:.32em;line-height:1;color:var(--paper);text-shadow:0 4px 30px rgba(0,0,0,.85);
+    padding:.2em 0;
+  }
+  .act-card .vertical .num{color:var(--amber)}
+  .act-card .meta{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+  .act-card .meta .en{font-size:11px;letter-spacing:.42em;color:rgba(247,240,228,.5);text-transform:uppercase}
+  .act-card .meta .rule{width:120px;height:1px;background:linear-gradient(90deg,rgba(240,180,100,.9),transparent)}
+  .act-card .meta .sub-en{font-family:var(--serif);font-size:15px;letter-spacing:.14em;color:rgba(247,240,228,.72);font-style:italic}
+  .act-card .seal2{width:44px;height:44px;border-radius:8px;background:linear-gradient(160deg,#d2543c,#a8301f);display:grid;place-items:center;font-family:var(--serif);font-size:15px;line-height:1;color:#ffeede;box-shadow:0 6px 18px rgba(200,68,47,.4)}
+
+  /* 舞台前区：用户回合 */
+  .apron{
+    position:absolute;left:50%;bottom:calc(var(--bar) + 18px);transform:translateX(-50%) translateY(130%);
+    width:min(94vw,880px);padding:16px 20px 18px;border-radius:20px;
+    background:linear-gradient(180deg,rgba(24,20,32,.94),rgba(12,10,18,.97));
+    box-shadow:0 -8px 60px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.09);
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    transition:transform .62s var(--ease-out),opacity .38s var(--ease-out),visibility .38s;
+    opacity:0;visibility:hidden;pointer-events:none;
+  }
+  .apron.on{transform:translateX(-50%) translateY(0);opacity:1;visibility:visible;pointer-events:auto}
+  .apron-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .apron-tag{
+    display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:.24em;
+    color:var(--amber);text-transform:uppercase;
+  }
+  .apron-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 5px rgba(240,180,100,.16);animation:pulse 1.9s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+  .apron-hint{font-size:13px;color:var(--paper-2);letter-spacing:.03em;padding-left:12px;border-left:1px solid rgba(255,255,255,.16);display:flex;flex-direction:column;gap:1px}
+  .apron-target{
+    margin-top:12px;font-family:var(--serif);font-size:clamp(19px,2vw,26px);letter-spacing:.06em;color:var(--amber);
+    padding:10px 13px;border-radius:12px;background:rgba(240,180,100,.09);
+    box-shadow:inset 0 0 0 1px rgba(240,180,100,.24);
+    display:none;
+  }
+  .apron-target.on{display:block;animation:charIn .5s var(--ease-out)}
+  .apron-target small{display:block;font-family:var(--sans);font-size:10.5px;letter-spacing:.1em;color:rgba(240,180,100,.66);margin-top:6px}
+  .apron-main{margin-top:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .mic{
+    position:relative;display:inline-flex;align-items:center;gap:11px;padding:14px 22px;border-radius:16px;
+    background:linear-gradient(180deg,#f2c078,#d99a45);color:#241603;font-weight:700;font-size:14px;letter-spacing:.05em;
+    box-shadow:0 10px 30px rgba(214,158,80,.32);transition:.2s var(--ease-out);user-select:none;touch-action:none;
+  }
+  .mic:hover{transform:translateY(-1px)}
+  .mic.rec{background:linear-gradient(180deg,#e0654f,#b93a2a);color:#fff;box-shadow:0 10px 34px rgba(200,68,47,.45)}
+  .mic .dot{width:9px;height:9px;border-radius:50%;background:currentColor;opacity:.85}
+  .mic .mic-label{white-space:nowrap}
+  .wave{display:none;align-items:flex-end;gap:3px;height:18px}
+  .mic.rec .wave{display:inline-flex}
+  .mic.rec .dot{display:none}
+  .wave i{width:3px;border-radius:2px;background:#fff;height:6px;animation:wave 1s ease-in-out infinite}
+  .wave i:nth-child(2){animation-delay:.1s}
+  .wave i:nth-child(3){animation-delay:.22s}
+  .wave i:nth-child(4){animation-delay:.33s}
+  .wave i:nth-child(5){animation-delay:.16s}
+  @keyframes wave{0%,100%{height:5px}50%{height:18px}}
+  .apron-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+  .tool{
+    border-radius:999px;padding:8px 13px;font-size:11.5px;letter-spacing:.04em;color:rgba(247,240,228,.74);
+    background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);transition:.2s var(--ease-out);
+  }
+  .tool:hover{background:rgba(255,255,255,.14);color:#fff}
+  .tool.used{color:var(--amber);box-shadow:inset 0 0 0 1px rgba(240,180,100,.5);background:rgba(240,180,100,.12)}
+  .option-row{display:grid;gap:9px;width:100%;margin-top:2px}
+  .option{
+    text-align:left;padding:13px 15px;border-radius:14px;background:rgba(255,255,255,.06);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);transition:.2s var(--ease-out);
+  }
+  .option:hover{background:rgba(255,255,255,.13);transform:translateX(3px);box-shadow:inset 0 0 0 1px rgba(240,180,100,.5)}
+  .option:disabled{cursor:default;transform:none}
+  .option.correct{background:rgba(132,195,171,.12);box-shadow:inset 0 0 0 1.5px rgba(132,195,171,.7);opacity:1}
+  .option.correct::after{content:"✓ 听懂了";float:right;font-size:10.5px;color:var(--jade);letter-spacing:.08em}
+  .option.wrong{opacity:.42;box-shadow:inset 0 0 0 1px rgba(200,68,47,.5)}
+  .option.wrong::after{content:"× 不是这句";float:right;font-size:10.5px;color:rgba(200,68,47,.85);letter-spacing:.08em}
+  .option.picked{background:rgba(240,180,100,.1);box-shadow:inset 0 0 0 1.5px rgba(240,180,100,.6);opacity:1}
+  .option.picked::after{content:"✓ 你的回答";float:right;font-size:10.5px;color:var(--amber);letter-spacing:.08em}
+  .option b{display:block;font-family:var(--serif);font-size:17px;letter-spacing:.04em}
+  .option > span{display:block;font-size:11px;color:rgba(247,240,228,.5);margin-top:4px;letter-spacing:.04em}
+  .option b .glyph{display:inline-block}
+  .apron-feedback{margin-top:13px;display:none;gap:11px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.09)}
+  .apron-feedback.on{display:flex;animation:charIn .5s var(--ease-out)}
+  .apron-feedback .fb-icon{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;flex:0 0 auto;background:rgba(132,195,171,.18);color:var(--jade)}
+  .apron-feedback b{display:block;font-size:13px;margin-bottom:3px}
+  .apron-feedback p{margin:0;font-size:11.5px;line-height:1.6;color:rgba(247,240,228,.6)}
+  .chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .chip{
+    border-radius:999px;padding:4px 9px;font-size:10px;letter-spacing:.08em;
+    background:rgba(255,255,255,.08);color:rgba(247,240,228,.72);
+  }
+  .chip.ind{background:rgba(132,195,171,.16);color:var(--jade)}
+  .chip.sup{background:rgba(240,180,100,.16);color:var(--amber)}
+  .chip.watch{background:rgba(255,255,255,.08);color:rgba(247,240,228,.5)}
+
+  /* 底部控制 */
+  .transport{
+    position:absolute;right:24px;bottom:calc(var(--bar) + 22px);display:flex;align-items:center;gap:8px;
+    opacity:.62;transition:opacity .4s var(--ease-out);
+  }
+  .transport:hover{opacity:1}
+  .transport .icon-btn{width:34px;height:34px;border-radius:11px;background:rgba(10,9,14,.6);backdrop-filter:blur(10px)}
+  /* 鼠标静止：幕目录 / 控制条 / 老师球一起隐去，留下纯舞台 */
+  body.idle .act-rail,body.idle .transport,body.idle .teacher-orb,body.idle .episode-card{
+    opacity:0;pointer-events:none;transition:opacity .8s var(--ease-out)
+  }
+  body.idle .act-rail:hover,body.idle .transport:hover,body.idle .teacher-orb:hover{opacity:1;pointer-events:auto}
+  .progress{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.07);z-index:60}
+  .progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,rgba(240,180,100,.5),var(--amber));transition:width .5s linear}
+
+  /* 老师悬浮球 */
+  .teacher-orb{
+    position:absolute;left:24px;bottom:calc(var(--bar) + 22px);width:56px;height:56px;border-radius:50%;
+    padding:3px;background:linear-gradient(150deg,rgba(169,156,245,.9),rgba(120,104,220,.6));
+    box-shadow:0 10px 30px rgba(88,70,190,.42),0 0 0 1px rgba(255,255,255,.16) inset;
+    transition:.28s var(--ease-out);animation:breath 4s ease-in-out infinite;
+  }
+  .teacher-orb img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+  .teacher-orb:hover{transform:translateY(-3px) scale(1.04)}
+  .teacher-orb::after{
+    content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid rgba(169,156,245,.34);
+    animation:ring 3.4s ease-out infinite;
+  }
+  @keyframes ring{0%{transform:scale(.86);opacity:.8}100%{transform:scale(1.28);opacity:0}}
+  @keyframes breath{0%,100%{box-shadow:0 10px 30px rgba(88,70,190,.42)}50%{box-shadow:0 14px 40px rgba(120,100,240,.6)}}
+  .teacher-sheet{
+    position:absolute;left:24px;bottom:calc(var(--bar) + 90px);width:290px;padding:14px;border-radius:18px;
+    background:linear-gradient(180deg,rgba(26,22,38,.96),rgba(13,11,20,.98));
+    box-shadow:0 -6px 40px rgba(0,0,0,.6),inset 0 0 0 1px rgba(169,156,245,.22);
+    backdrop-filter:blur(16px);
+    opacity:0;transform:translateY(10px) scale(.98);pointer-events:none;transition:.32s var(--ease-out);
+  }
+  .teacher-sheet.on{opacity:1;transform:none;pointer-events:auto}
+  body.turn .teacher-sheet{bottom:calc(var(--bar) + var(--apron-h,272px) - 6px)}
+  .teacher-sheet header{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+  .teacher-sheet header img{width:30px;height:30px;border-radius:50%;object-fit:cover}
+  .teacher-sheet header b{font-size:12.5px;letter-spacing:.04em}
+  .teacher-sheet header span{display:block;font-size:9.5px;color:rgba(247,240,228,.45);letter-spacing:.08em}
+  .teacher-sheet .t-line{font-size:11.5px;line-height:1.6;color:rgba(247,240,228,.66);padding:9px 10px;border-radius:11px;background:rgba(169,156,245,.1);margin-bottom:10px}
+  .teacher-sheet .t-actions{display:grid;gap:6px}
+  .teacher-sheet .t-actions button{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 11px;border-radius:11px;
+    background:rgba(255,255,255,.06);font-size:11.5px;transition:.2s var(--ease-out);text-align:left;
+  }
+  .teacher-sheet .t-actions button:hover{background:rgba(255,255,255,.14)}
+  .teacher-sheet .t-actions button small{color:rgba(247,240,228,.42);font-size:9.5px;letter-spacing:.06em}
+
+  /* 导演解说面板 */
+  .director{
+    position:absolute;right:0;top:var(--chrome-h);bottom:0;width:min(92vw,400px);z-index:55;
+    background:linear-gradient(180deg,rgba(9,8,14,.95),rgba(6,5,10,.98));
+    box-shadow:-20px 0 60px rgba(0,0,0,.6),inset 1px 0 0 rgba(255,255,255,.07);
+    backdrop-filter:blur(20px);
+    transform:translateX(102%);transition:transform .48s var(--ease-out);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .director.on{transform:none}
+  .director header{padding:16px 18px 13px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .director header b{display:block;font-size:13px;letter-spacing:.14em}
+  .director header span{display:block;font-size:10px;color:rgba(247,240,228,.45);letter-spacing:.1em;margin-top:4px}
+  .director .d-body{overflow-y:auto;padding:14px 18px 34px;scrollbar-width:thin}
+  .director .d-body::-webkit-scrollbar{width:6px}
+  .director .d-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:99px}
+  .d-sec{margin-bottom:18px}
+  .d-sec > h4{
+    margin:0 0 9px;font-size:9.5px;letter-spacing:.24em;color:rgba(240,180,100,.8);text-transform:uppercase;font-weight:600;
+  }
+  .d-grid{display:grid;gap:7px}
+  .d-row{display:flex;gap:9px;align-items:flex-start;font-size:11.5px;line-height:1.55}
+  .d-row .k{flex:0 0 62px;color:rgba(247,240,228,.42);font-size:10.5px;letter-spacing:.06em}
+  .d-row .v{color:rgba(247,240,228,.82)}
+  .d-row .v code{
+    font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10.5px;color:var(--amber);
+    background:rgba(240,180,100,.1);padding:1.5px 5px;border-radius:5px;
+  }
+  .d-log{display:flex;flex-direction:column;gap:8px}
+  .log-item{position:relative;padding:9px 11px 9px 12px;border-radius:11px;background:rgba(255,255,255,.045);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+  .log-item::before{content:"";position:absolute;left:0;top:11px;bottom:11px;width:2px;border-radius:2px;background:var(--c,var(--amber))}
+  .log-item .l-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .log-item .l-agent{font-size:9.5px;letter-spacing:.16em;color:var(--c,var(--amber));text-transform:uppercase}
+  .log-item .l-time{font-size:9px;color:rgba(247,240,228,.34)}
+  .log-item b{display:block;font-size:11.5px;margin-top:3px;font-weight:600}
+  .log-item p{margin:3px 0 0;font-size:10.5px;line-height:1.55;color:rgba(247,240,228,.52)}
+  .ev-card{border-radius:12px;padding:10px 12px;background:rgba(132,195,171,.09);box-shadow:inset 0 0 0 1px rgba(132,195,171,.22);margin-bottom:7px}
+  .ev-card .ev-top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .ev-card b{font-size:11.5px}
+  .ev-card p{margin:5px 0 0;font-size:10.5px;line-height:1.55;color:rgba(247,240,228,.55)}
+  .ev-empty{font-size:10.5px;color:rgba(247,240,228,.36);line-height:1.6}
+  .d-note{font-size:10px;line-height:1.66;color:rgba(247,240,228,.4);border-top:1px solid rgba(255,255,255,.07);padding-top:12px}
+
+  /* ---------------- 开幕幕布 ---------------- */
+  .overture{position:absolute;inset:0;z-index:70;overflow:hidden}
+  .overture.hide{pointer-events:none}
+  .verture-panel{
+    position:absolute;top:0;bottom:0;width:52%;background:
+      repeating-linear-gradient(90deg,rgba(255,255,255,.028) 0 2px,transparent 2px 8px),
+      linear-gradient(180deg,#1a0f16,#0b070c 60%,#080509);
+    transition:transform 1.5s var(--ease-inout);
+  }
+  .verture-panel.l{left:0;transform:translateX(-1%)}
+  .verture-panel.r{right:0;transform:translateX(1%)}
+  .overture.open .verture-panel.l{transform:translateX(-102%)}
+  .overture.open .verture-panel.r{transform:translateX(102%)}
+  .overture.hide{opacity:0;transition:opacity .6s 1s}
+  .overture .o-inner{
+    position:absolute;inset:0;z-index:2;display:grid;place-items:center;text-align:center;
+    transition:opacity .6s var(--ease-out);
+  }
+  .overture.open .o-inner{opacity:0}
+  .o-content{display:flex;flex-direction:column;align-items:center;gap:20px;padding:0 24px}
+  .o-seal{width:62px;height:62px;border-radius:12px;background:linear-gradient(160deg,#d2543c,#a12c1c);display:grid;place-items:center;font-family:var(--serif);font-size:19px;line-height:1.04;color:#ffeede;box-shadow:0 10px 30px rgba(200,68,47,.4),inset 0 0 0 1px rgba(255,255,255,.18)}
+  .o-kicker{font-size:10.5px;letter-spacing:.5em;color:rgba(247,240,228,.5);text-transform:uppercase}
+  .o-title{font-family:var(--serif);font-size:clamp(46px,7vw,96px);letter-spacing:.22em;line-height:1.1;text-indent:.22em;color:var(--paper);text-shadow:0 8px 50px rgba(0,0,0,.8)}
+  .o-sub{font-family:var(--serif);font-size:clamp(13px,1.35vw,17px);letter-spacing:.2em;color:rgba(240,180,100,.86)}
+  .o-en{font-size:11px;letter-spacing:.24em;color:rgba(247,240,228,.36);text-transform:uppercase}
+  .o-brand{font-size:11.5px;letter-spacing:.3em;color:rgba(240,180,100,.82);text-transform:uppercase}
+  .o-hr{width:min(60vw,420px);height:1px;background:linear-gradient(90deg,transparent,rgba(240,180,100,.6),transparent)}
+  .o-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;margin-top:6px}
+  .btn-primary{
+    padding:15px 34px;border-radius:999px;background:linear-gradient(180deg,#f2c078,#d99a45);color:#241603;
+    font-weight:700;font-size:14.5px;letter-spacing:.16em;box-shadow:0 14px 40px rgba(214,158,80,.34);transition:.24s var(--ease-out);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 20px 50px rgba(214,158,80,.44)}
+  .btn-ghost{
+    padding:13px 22px;border-radius:999px;font-size:12.5px;letter-spacing:.1em;color:rgba(247,240,228,.68);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);transition:.24s var(--ease-out);
+  }
+  .btn-ghost:hover{color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)}
+  .cc-actions a.btn-ghost{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+
+  /* ============================================================
+     v0.3 · 零基础支持：字幕分层 / TPRS 追问条 / 后台排练室
+     ============================================================ */
+
+  /* --- 零基础档：去汉字，拼音升为主行 --- */
+  body.no-hanzi .subs .zh{display:none}
+  body.no-hanzi .subs .py{
+    margin-top:0;color:rgba(247,240,228,.97);
+    font-size:clamp(23px,3vw,44px);letter-spacing:.05em;line-height:1.42;
+    text-shadow:0 3px 30px rgba(0,0,0,.9),0 1px 4px rgba(0,0,0,.7);
+  }
+  body.no-hanzi .narration .n-zh{display:none}
+  .narration .n-py{display:none;color:rgba(247,240,228,.92);font-size:clamp(16px,1.7vw,25px);letter-spacing:.07em;line-height:1.6;text-shadow:0 2px 18px rgba(0,0,0,.85)}
+  body.no-hanzi .narration .n-py{display:block}
+  body.no-hanzi .act-card .vertical{display:none}
+  .act-card .vertical-py{display:none;font-family:var(--sans);text-align:center;font-size:clamp(20px,2.4vw,36px);letter-spacing:.16em;color:var(--paper);text-shadow:0 4px 30px rgba(0,0,0,.85)}
+  body.no-hanzi .act-card .vertical-py{display:block}
+  body.no-hanzi .apron-target .reveal-txt{display:none}
+  body.no-hanzi .apron-target small{font-size:clamp(16px,1.7vw,21px);color:var(--amber);line-height:1.55}
+
+  /* --- TPRS 追问条 --- */
+  .circle-bar{
+    position:absolute;left:50%;bottom:calc(var(--bar) + 60px);z-index:42;
+    transform:translateX(-50%) translateY(12px);
+    display:flex;flex-direction:column;align-items:center;gap:9px;
+    opacity:0;pointer-events:none;transition:.45s var(--ease-out);
+  }
+  .circle-bar.on{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+  .cb-tag{font-size:10px;letter-spacing:.28em;color:var(--amber);text-transform:uppercase;text-shadow:0 2px 12px rgba(0,0,0,.85)}
+  .cb-options{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .cb-opt{
+    display:flex;flex-direction:column;align-items:center;gap:2px;min-width:148px;
+    padding:10px 16px;border-radius:14px;text-align:center;
+    background:linear-gradient(180deg,rgba(24,20,32,.92),rgba(12,10,18,.96));
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 10px 30px rgba(0,0,0,.5);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    transition:.22s var(--ease-out);
+  }
+  .cb-opt:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px rgba(240,180,100,.5),0 12px 34px rgba(0,0,0,.55)}
+  .cb-opt b{font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:.04em}
+  .cb-opt span{font-size:10.5px;color:rgba(240,180,100,.85);letter-spacing:.04em}
+  .cb-opt span.idtx{color:rgba(158,210,186,.85)}
+  .cb-opt.correct{background:linear-gradient(180deg,rgba(30,42,38,.96),rgba(14,22,20,.98));box-shadow:inset 0 0 0 1px rgba(132,195,171,.8),0 10px 30px rgba(0,0,0,.5)}
+  .cb-opt.wrong{opacity:.45;box-shadow:inset 0 0 0 1px rgba(240,180,100,.5)}
+  .cb-opt:disabled{cursor:default;transform:none}
+  /* 追问进行时：字幕整体上移，给选项条让位 */
+  body.circling .subs{bottom:calc(var(--bar) + 176px)}
+  @media (max-width:900px){ body.circling .subs{bottom:calc(var(--bar) + 210px)} }
+
+  /* --- 后台 · 排练室（放大版 · 中/EN/ID） --- */
+  .rehearsal{
+    position:fixed;inset:0;z-index:72;display:grid;place-items:center;
+    background:radial-gradient(ellipse 90% 70% at 50% 40%,rgba(22,17,32,.92),rgba(4,4,7,.97));
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    opacity:0;pointer-events:none;transition:opacity .5s var(--ease-out);
+  }
+  .rehearsal.on{opacity:1;pointer-events:auto}
+  .rb-card{
+    width:min(94vw,1080px);max-height:92vh;overflow:auto;
+    min-height:min(74vh,680px);padding:36px 44px 28px;border-radius:26px;
+    display:flex;flex-direction:column;
+    background:linear-gradient(180deg,rgba(22,18,30,.97),rgba(10,9,15,.99));
+    box-shadow:0 40px 120px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.08);
+    transform:translateY(14px);transition:transform .5s var(--ease-out);
+  }
+  .rehearsal.on .rb-card{transform:none}
+  .rb-head{position:relative;padding-right:210px;margin-bottom:20px}
+  .rb-kicker{font-size:11.5px;letter-spacing:.32em;color:var(--amber);text-transform:uppercase}
+  .rb-title{font-family:var(--serif);font-size:clamp(28px,3.1vw,42px);letter-spacing:.08em;margin:10px 0 8px}
+  .rb-sub{font-size:14.5px;line-height:1.8;color:var(--paper-2);max-width:860px;margin:0}
+  .rb-lang{display:inline-flex;gap:6px;margin-top:16px;flex-wrap:wrap}
+  .rb-lang button{
+    padding:7px 15px;border-radius:999px;font-size:12px;letter-spacing:.05em;
+    color:var(--paper-3);background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);
+    transition:.2s var(--ease-out);
+  }
+  .rb-lang button:hover{color:#fff}
+  .rb-lang button[aria-pressed="true"]{background:linear-gradient(180deg,#f4c885,#d99c4c);color:#2a1c08;box-shadow:0 4px 14px rgba(214,158,80,.3)}
+  .rb-skip{position:absolute;right:0;top:2px;font-size:12.5px;color:var(--paper-3);text-decoration:underline;text-underline-offset:3px}
+  .rb-skip:hover{color:var(--amber)}
+  .rb-dots{display:flex;gap:8px;margin-bottom:18px}
+  .rb-dots i{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.14)}
+  .rb-dots i.on{background:var(--amber)}
+  .rb-dots i.done{background:rgba(240,180,100,.42)}
+  .rb-stage{min-height:330px;flex:1;display:flex;flex-direction:column;justify-content:center}
+  .rb-label{font-size:11.5px;letter-spacing:.22em;color:var(--paper-3);text-transform:uppercase;margin-bottom:12px}
+  .rb-copy{font-size:14.5px;line-height:1.85;color:var(--paper-2);max-width:880px;margin:0 0 18px}
+  .rb-hero{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .rb-syl{
+    display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 24px;border-radius:16px;
+    background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);transition:.2s var(--ease-out);
+  }
+  .rb-syl:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px rgba(240,180,100,.45)}
+  .rb-syl.played{box-shadow:inset 0 0 0 1px rgba(132,195,171,.7)}
+  .rb-py{font-size:24px;letter-spacing:.06em;color:var(--paper)}
+  .rb-py.big{font-size:clamp(34px,4vw,54px);color:var(--amber);font-family:var(--serif);letter-spacing:.1em}
+  .rb-tone{font-size:11.5px;color:var(--paper-3);letter-spacing:.04em}
+  .rb-plus,.rb-eq{color:var(--paper-3);font-size:22px}
+  .rb-play{display:flex;align-items:center;gap:12px;padding:16px 24px;border-radius:16px;background:rgba(240,180,100,.14);box-shadow:inset 0 0 0 1px rgba(240,180,100,.4);transition:.2s var(--ease-out)}
+  .rb-play:hover{transform:translateY(-2px)}
+  .rb-play span{font-size:12.5px;color:var(--paper-2)}
+  .rb-note{font-size:11.5px;color:var(--paper-3);margin:14px 0 0}
+  .rb-cards{display:flex;gap:12px;flex-wrap:wrap}
+  .rb-card-btn{
+    display:flex;flex-direction:column;align-items:center;gap:4px;min-width:112px;
+    padding:14px 18px;border-radius:14px;font-size:17px;color:var(--paper);
+    background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);transition:.2s var(--ease-out);
+  }
+  .rb-card-btn span{font-size:11px;color:var(--paper-3)}
+  .rb-card-btn:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px rgba(240,180,100,.45)}
+  .rb-card-btn.played{box-shadow:inset 0 0 0 1px rgba(132,195,171,.65)}
+  .rb-quiz{display:flex;flex-direction:column;gap:16px}
+  .rb-chips{display:flex;gap:10px;flex-wrap:wrap}
+  .rb-answer{display:flex;gap:14px;flex-wrap:wrap}
+  .rb-tone-btn{
+    display:flex;flex-direction:column;align-items:center;gap:8px;min-width:190px;padding:20px 26px;border-radius:18px;
+    background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);transition:.2s var(--ease-out);
+  }
+  .rb-tone-btn:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px rgba(240,180,100,.45)}
+  .rb-tone-btn b{font-size:30px;letter-spacing:.08em;color:var(--paper)}
+  .rb-tone-btn span{font-size:11.5px;color:var(--paper-3)}
+  .rb-tone-btn.correct{box-shadow:inset 0 0 0 1px rgba(132,195,171,.8)}
+  .rb-tone-btn.wrong{opacity:.5}
+  .curve{display:block;width:64px;height:24px}
+  .curve path{fill:none;stroke:var(--amber);stroke-width:2.4;stroke-linecap:round}
+  .rb-fb{min-height:22px;font-size:13.5px;color:var(--jade);letter-spacing:.02em}
+  .rb-fb.warn{color:var(--amber)}
+  .rb-progress{font-size:11.5px;color:var(--paper-3);letter-spacing:.12em}
+  .rb-panda{width:132px;height:132px;border-radius:22px;object-fit:cover;box-shadow:0 14px 40px rgba(0,0,0,.55)}
+  .rb-meaning{font-size:14px;color:var(--paper-2);margin:4px 0 14px}
+  .rb-rules{display:grid;grid-template-columns:1fr;gap:12px}
+  .rb-rule{display:flex;align-items:baseline;gap:14px;padding:15px 18px;border-radius:15px;background:rgba(255,255,255,.045);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+  .rb-rule b{font-family:var(--serif);font-size:16px;color:var(--amber);min-width:118px}
+  .rb-rule span{font-size:13.5px;color:var(--paper-2);line-height:1.65}
+  .rb-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px}
+  .rb-foot .btn-primary,.rb-foot .btn-ghost{padding:12px 28px;font-size:14px}
+  .rb-foot button:disabled{opacity:.35;pointer-events:none}
+  @media (max-width:900px){
+    .rb-card{padding:22px 20px 18px;min-height:0;width:min(96vw,1080px)}
+    .rb-head{padding-right:0}
+    .rb-skip{position:static;display:block;margin-top:12px}
+  }
+  @media (max-height:760px){
+    .rb-card{min-height:0;padding:22px 26px 18px}
+    .rb-stage{min-height:220px}
+    .rb-panda{width:96px;height:96px}
+  }
+
+  /* --- 谢幕 · 汉字邀请 --- */
+  .cc-invite{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    margin-top:14px;padding:14px 18px;border-radius:16px;
+    background:linear-gradient(180deg,rgba(240,180,100,.12),rgba(240,180,100,.05));
+    box-shadow:inset 0 0 0 1px rgba(240,180,100,.32);
+  }
+  .cc-invite[hidden]{display:none}
+  .cc-invite b{display:block;font-family:var(--serif);font-size:15px;letter-spacing:.05em;color:var(--amber)}
+  .cc-invite span{font-size:11.5px;color:var(--paper-2);line-height:1.7}
+  .cc-invite-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .cc-invite-actions .btn-primary,.cc-invite-actions .btn-ghost{padding:9px 18px;font-size:12px}
+
+  .o-hint{font-size:10.5px;letter-spacing:.14em;color:rgba(247,240,228,.32);margin-top:2px}
+  .o-cast{display:flex;gap:10px;margin-top:4px}
+  .o-cast img{width:38px;height:38px;border-radius:50%;object-fit:cover;object-position:50% 26%;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
+  .o-cast img:last-child{object-position:50% 34%}
+
+  /* ---------------- 谢幕 ---------------- */
+  .curtain-call{
+    position:absolute;inset:0;z-index:66;display:grid;place-items:center;padding:calc(var(--chrome-h) + 18px) 22px 26px;
+    background:radial-gradient(ellipse 82% 72% at 50% 42%,rgba(16,12,22,.84),rgba(5,5,9,.94));
+    opacity:0;pointer-events:none;transition:opacity .7s var(--ease-out);overflow-y:auto;
+  }
+  .curtain-call.on{opacity:1;pointer-events:auto}
+  .cc-card{
+    width:min(96vw,780px);padding:30px 32px 26px;border-radius:24px;text-align:left;
+    background:linear-gradient(180deg,rgba(22,19,30,.92),rgba(11,9,16,.94));
+    box-shadow:0 30px 90px rgba(0,0,0,.66),inset 0 0 0 1px rgba(255,255,255,.09);
+    transform:translateY(14px);transition:transform .8s var(--ease-out);
+  }
+  .curtain-call.on .cc-card{transform:none}
+  .cc-kicker{font-size:10px;letter-spacing:.42em;color:rgba(240,180,100,.8);text-transform:uppercase}
+  .cc-title{font-family:var(--serif);font-size:clamp(24px,3vw,34px);letter-spacing:.1em;margin:10px 0 4px}
+  .cc-sub{font-size:12px;color:rgba(247,240,228,.5);letter-spacing:.06em}
+  .cc-grid{display:grid;gap:10px;margin:20px 0 18px}
+  .cc-ev{
+    display:flex;gap:13px;align-items:flex-start;padding:13px 15px;border-radius:15px;
+    background:rgba(255,255,255,.045);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);
+  }
+  .cc-ev .idx{font-family:var(--serif);font-size:12px;color:var(--amber);flex:0 0 20px;padding-top:2px}
+  .cc-ev b{display:block;font-size:13px;letter-spacing:.04em}
+  .cc-ev p{margin:4px 0 0;font-size:11.5px;line-height:1.6;color:rgba(247,240,228,.55)}
+  .cc-line{
+    padding:16px 18px;border-radius:16px;background:rgba(240,180,100,.08);box-shadow:inset 0 0 0 1px rgba(240,180,100,.22);
+  }
+  .cc-line > span{font-size:10px;letter-spacing:.2em;color:rgba(240,180,100,.72);text-transform:uppercase}
+  .cc-line .idtx{font-size:11.5px;letter-spacing:.02em;color:#9ed2ba;text-transform:none}
+  .cc-line p{margin:8px 0 0;font-family:var(--serif);font-size:clamp(19px,2.1vw,25px);letter-spacing:.06em;line-height:1.5}
+  .cc-line p i{font-style:normal;color:var(--amber);border-bottom:1px dashed rgba(240,180,100,.5);padding:0 12px}
+  .cc-review{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0 6px}
+  .cc-day{flex:1 1 190px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+  .cc-day b{display:block;font-size:11px;letter-spacing:.16em;color:var(--jade)}
+  .cc-day span{display:block;font-size:11px;color:rgba(247,240,228,.58);margin-top:5px;line-height:1.55}
+  .cc-teacher{display:flex;gap:12px;align-items:center;margin-top:20px;padding:13px 15px;border-radius:16px;background:rgba(169,156,245,.09);box-shadow:inset 0 0 0 1px rgba(169,156,245,.2)}
+  .cc-teacher img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cc-teacher p{margin:0;font-size:11.5px;line-height:1.62;color:rgba(247,240,228,.72)}
+  .cc-teacher p b{color:var(--panda)}
+  .cc-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;align-items:center}
+
+  @media (max-height:900px){
+    .cc-card{padding:22px 26px 20px}
+    .cc-title{font-size:clamp(21px,2.4vw,28px)}
+    .cc-ev{padding:11px 13px}
+    .cc-grid{margin:14px 0 12px;gap:8px}
+    .cc-line{padding:13px 15px}
+    .cc-review{margin:13px 0 4px}
+    .cc-teacher{margin-top:14px;padding:11px 13px}
+    .cc-actions{margin-top:15px}
+  }
+
+  /* toast */
+  .toast{
+    position:absolute;left:50%;bottom:calc(var(--bar) + 96px);transform:translateX(-50%) translateY(8px);
+    padding:10px 16px;border-radius:999px;font-size:12px;letter-spacing:.04em;
+    background:rgba(12,10,18,.94);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 12px 36px rgba(0,0,0,.5);
+    opacity:0;pointer-events:none;transition:.3s var(--ease-out);z-index:80;max-width:80vw;text-align:center;
+  }
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ---------------- 经典原型 iframe ---------------- */
+  .classic-frame{
+    position:fixed;left:0;right:0;top:var(--chrome-h);bottom:0;width:100%;height:calc(100vh - var(--chrome-h));
+    border:0;background:#f3efe8;z-index:10;display:none;
+  }
+  body[data-mode="classic"] .classic-frame{display:block}
+  .classic-fallback{
+    position:fixed;left:50%;top:52%;transform:translate(-50%,-50%);z-index:12;display:none;text-align:center;
+    padding:24px 28px;border-radius:18px;background:rgba(12,10,18,.92);color:rgba(247,240,228,.78);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 20px 60px rgba(0,0,0,.5);
+    max-width:440px;font-size:12.5px;line-height:1.75;
+  }
+  body[data-mode="classic"] .classic-fallback.on{display:block}
+  .classic-fallback b{display:block;font-size:14px;margin-bottom:8px;color:var(--paper)}
+  .classic-fallback a{color:var(--amber);text-decoration:none;border-bottom:1px solid rgba(240,180,100,.5)}
+  .classic-hint{
+    position:fixed;right:18px;bottom:18px;z-index:20;padding:9px 14px;border-radius:999px;font-size:11px;
+    background:rgba(12,10,18,.86);color:rgba(247,240,228,.72);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+    opacity:0;transition:opacity .5s;pointer-events:none;
+  }
+  body[data-mode="classic"] .classic-hint{opacity:1}
+
+  /* 隐藏的读屏提示 */
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* ---------------- 自适应 ---------------- */
+  @media (max-width:1180px){
+    .act-rail{display:none}
+    .episode-card{left:16px}
+  }
+  @media (max-width:900px){
+    :root{--bar:4.6vh}
+    .chrome{padding:0 10px}
+    .chrome-title span{display:none}
+    .mode-switch button{padding:6px 10px;font-size:10.5px}
+    .mode-switch button small{display:none}
+    .only-wide{display:none}
+    .director{width:100vw;top:var(--chrome-h)}
+    .transport{right:14px;gap:6px}
+    .teacher-orb{left:14px;width:48px;height:48px}
+    .subs .zh{font-size:clamp(22px,6vw,34px)}
+    .subs{bottom:calc(var(--bar) + 22px)}
+    .apron{padding:14px 15px 16px}
+    .mic{padding:12px 18px;font-size:13px}
+    .act-card .inner{gap:20px}
+  }
+  @media (max-height:620px){
+    .act-rail{display:none}
+    .subs .zh{font-size:clamp(20px,2.6vw,30px)}
+    .apron-main{margin-top:10px}
+    .apron-tools{margin-top:9px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .grain,.flicker,.mote,.teacher-orb,.teacher-orb::after{animation:none!important}
+    .stage-layer img{transition:none!important}
+  }
+
+  /* ---------- 印尼语辅助层 ---------- */
+  .idtx{color:#9ed2ba;font-size:12px;line-height:1.58;letter-spacing:.01em}
+  .idtx.block{display:block;margin-top:6px}
+  body.no-indo .idtx{display:none!important}
+  .biid{display:none}
+  body:not(.no-indo) .biid{display:inline}
+  body:not(.no-indo) .bizh{display:none}
+  .subs .idtx{margin-top:7px;font-size:clamp(12.5px,1.02vw,16.5px)}
+  .narration .idtx{margin-top:8px;font-size:clamp(12px,.98vw,15px)}
+  .apron-hint .idtx{margin-top:2px;font-size:11.5px}
+  .apron-target .idtx{margin-top:5px;font-size:11.5px}
+  .option .idtx{margin-top:3px;font-size:11px}
+  .cc-ev .idtx,.cc-line .idtx,.cc-day .idtx{margin-top:5px;font-size:11px}
+  .teacher-sheet .idtx{font-size:11px;margin-top:4px}
+  .o-id{font-size:12.5px;letter-spacing:.08em;color:#9ed2ba}
+  body.no-indo .o-id{display:none}
+  .act-card .sub-id{font-size:13px;letter-spacing:.08em;color:rgba(158,210,186,.85);margin-top:-4px}
+  body.no-indo .act-card .sub-id{display:none}
+  .episode-card .idtx{font-size:10px;letter-spacing:.04em;margin-top:1px}
+  .act-rail .id-mini{font-size:10px;letter-spacing:.04em;color:rgba(158,210,186,.75)}
+  .fb-id{display:block;margin-top:5px}
+
+  /* 汉字悬停：拼音 + 印尼语释义 */
+  .glyph{position:relative}
+  body:not(.no-indo) .glyph.has-py{cursor:help;box-shadow:inset 0 -1px 0 rgba(158,210,186,.32)}
+  body:not(.no-indo) .glyph.has-py:hover{color:#dff3ea}
+  body:not(.no-indo) .glyph.has-py::after{
+    content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 9px);transform:translate(-50%,5px);
+    background:rgba(9,8,14,.97);color:var(--amber);font-family:var(--sans);font-weight:400;
+    font-size:12.5px;line-height:1.45;letter-spacing:.01em;white-space:nowrap;padding:6px 11px;border-radius:9px;
+    box-shadow:0 10px 30px rgba(0,0,0,.6),inset 0 0 0 1px rgba(240,180,100,.3);
+    opacity:0;pointer-events:none;transition:.16s var(--ease-out);z-index:80;
+  }
+  body:not(.no-indo) .glyph.has-py:hover::after,
+  body:not(.no-indo) .glyph.has-py.show-tip::after{opacity:1;transform:translate(-50%,0)}
+  .glyph.has-py.show-tip::after{opacity:1;transform:translate(-50%,0)}
+  .v-legend{
+    position:absolute;left:24px;bottom:calc(var(--bar) + 88px);display:none;gap:8px;align-items:center;
+    font-size:10.5px;letter-spacing:.06em;color:rgba(158,210,186,.78);
+  }
+  body:not(.no-indo) .v-legend{display:flex}
+
+  /* 用户回合：字幕自动停在舞台前区上方 */
+  body.turn .subs{bottom:calc(var(--bar) + var(--apron-h, 272px))}
+  body.turn .subs .zh{font-size:clamp(21px,2.5vw,36px)}
+  body.turn .subs .py{font-size:clamp(11px,.95vw,14px)}
+  body.turn .subs .en{font-size:clamp(11px,.95vw,14px)}
+  @media (max-width:900px){ body.turn .subs{bottom:calc(var(--bar) + 300px)} }
+  @media (max-height:620px){ body.turn .subs{bottom:calc(var(--bar) + 250px)} }
+</style>
+</head>
+<body data-mode="theater" class="no-indo">
+
+<!-- ============ 顶部 chrome：右上角为「剧场版 / 经典版」切换开关 ============ -->
+<header class="chrome" id="chrome">
+  <div class="chrome-brand">
+    <div class="seal" aria-hidden="true">海棠</div>
+    <div class="chrome-title">
+      <b><span class="bizh">AI Chinese · 生活剧场</span><span class="biid">AI Chinese · Teater Kehidupan</span></b>
+      <span id="chromeSub"><span class="bizh">Haitang Street · Living Theater · Prototype v2</span><span class="biid">Haitang Street · Prototipe interaktif v2</span></span>
+    </div>
+  </div>
+  <div class="chrome-right">
+    <a class="chrome-link back-home" href="index.html">← 回到课程</a>
+    <a class="chrome-link only-classic" href="classic-prototype.html" target="_blank" rel="noopener">在新窗口打开 ↗</a>
+
+    <button class="icon-btn only-theater" id="btnSound" aria-pressed="false" title="环境音效（生成式，无音频文件）" aria-label="环境音效开关">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6.5a8 8 0 0 1 0 11"/></svg>
+    </button>
+    <button class="icon-btn only-theater only-wide" id="btnPinyin" aria-pressed="true" title="拼音字幕" aria-label="拼音字幕开关">拼</button>
+    <button class="icon-btn only-theater only-wide" id="btnEnglish" aria-pressed="true" title="英文字幕" aria-label="英文字幕开关">En</button>
+    <button class="icon-btn only-theater only-wide" id="btnHanzi" aria-pressed="false" title="汉字字幕（H）· 零基础档默认关闭；正式版第 4 集起自动邀请" aria-label="汉字字幕开关">字</button>
+    <button class="icon-btn only-theater" id="btnId" aria-pressed="false" title="印尼语辅助 · Bantuan bahasa Indonesia：显示印尼语讲解，汉字可悬停看拼音与释义" aria-label="印尼语辅助开关">ID</button>
+    <button class="icon-btn only-theater" id="btnDirector" aria-pressed="false" title="导演解说（D）" aria-label="导演解说面板">导</button>
+    <button class="icon-btn only-theater only-wide" id="btnFull" aria-pressed="false" title="全屏（F）" aria-label="全屏">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+    </button>
+
+    <div class="mode-switch" role="group" aria-label="切换原型版本">
+      <button id="modeTheater" aria-pressed="true">剧院版<small>IMMERSIVE</small></button>
+      <button id="modeClassic" aria-pressed="false">经典版<small>CLASSIC</small></button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 剧场 ============ -->
+<main class="theater" id="theater" aria-label="海棠街·生活剧场 沉浸式原型">
+  <div class="stage-layer" id="layerA"><img id="imgA" alt="" /></div>
+  <div class="stage-layer" id="layerB"><img id="imgB" alt="" /></div>
+  <div class="grade dusk" id="grade"></div>
+  <div class="spot" id="spot"></div>
+  <div class="motes" id="motes"></div>
+  <div class="vignette"></div>
+  <div class="flicker"></div>
+  <div class="grain"></div>
+
+  <div class="bar top"></div>
+  <div class="bar bottom"></div>
+  <div class="veil" id="veil"></div>
+
+  <div class="hud">
+    <!-- 剧集信息 -->
+    <div class="episode-card" id="episodeCard">
+      <b><span class="bizh">第一季 · 邻里夜市</span><span class="biid">Musim 1 · Pasar Malam Kampung</span></b>
+      <span>Episode 01 / 12</span>
+      <em><span class="bizh">新邻居</span><span class="biid">Tetangga Baru</span></em>
+    </div>
+
+    <!-- 幕目录 -->
+    <nav class="act-rail" id="actRail" aria-label="幕目录"></nav>
+
+    <!-- 字幕 -->
+    <div class="subs" id="subs" aria-live="polite">
+      <div class="who" id="subsWho"><b>林浩</b><span id="subsWhoEn">LIN HAO</span></div>
+      <div class="zh" id="subsZh"></div>
+      <div class="py" id="subsPy"></div>
+      <div class="en" id="subsEn"></div>
+      <div class="idtx" id="subsId"></div>
+    </div>
+
+    <!-- 旁白 -->
+    <div class="narration" id="narration">
+      <div class="n-zh" id="narrZh"></div>
+      <div class="n-py" id="narrPy"></div>
+      <div class="n-en" id="narrEn"></div>
+      <div class="idtx block" id="narrId"></div>
+    </div>
+
+    <!-- 幕卡 -->
+    <div class="act-card" id="actCard" aria-hidden="true">
+      <div class="inner">
+        <div class="vertical-py" id="actCardVerticalPy">dì yī mù · lóudào</div>
+        <div class="vertical" id="actCardVertical">第一幕<span class="num">·</span>楼道</div>
+        <div class="meta">
+          <div class="en" id="actCardEn">ACT ONE</div>
+          <div class="rule"></div>
+          <div class="sub-en" id="actCardSub">The hallway</div>
+          <div class="sub-id" id="actCardSubId">Koridor</div>
+          <div class="seal2">海棠</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 用户回合（舞台前区） -->
+    <div class="apron" id="apron" role="group" aria-label="该你了">
+      <div class="apron-top">
+        <span class="apron-tag"><span class="bizh">该你了 · Your turn</span><span class="biid">Giliranmu · Your turn</span></span>
+        <div class="apron-hint" id="apronHint"></div>
+      </div>
+      <div class="apron-target" id="apronTarget"></div>
+      <div class="apron-main" id="apronMain">
+        <button class="mic" id="micBtn" aria-label="按住说话">
+          <span class="dot"></span>
+          <span class="mic-label" id="micLabel"><span class="bizh">按住说话 · Hold to speak</span><span class="biid">Tekan & tahan untuk bicara</span></span>
+          <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        </button>
+        <div class="option-row" id="optionRow" hidden></div>
+      </div>
+      <div class="apron-tools" id="apronTools"></div>
+      <div class="apron-feedback" id="apronFeedback">
+        <div class="fb-icon" id="fbIcon">✓</div>
+        <div style="flex:1">
+          <b id="fbTitle"></b>
+          <p id="fbCopy"></p>
+          <div class="chip-row" id="fbChips"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TPRS 追问条（戏里的确认问句，听懂点一下） -->
+    <div class="circle-bar" id="circleBar" role="group" aria-label="听懂了就点一下">
+      <span class="cb-tag"><span class="bizh">追问 · 点一下</span><span class="biid">Dengarkan · ketuk</span></span>
+      <div class="cb-options" id="circleOptions"></div>
+    </div>
+
+    <!-- 底部控制 -->
+    <div class="transport">
+      <button class="icon-btn" id="btnPlay" title="暂停 / 继续（空格）" aria-label="暂停或继续" aria-pressed="false">
+        <svg id="iconPlay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v14M17 5v14"/></svg>
+      </button>
+      <button class="icon-btn" id="btnReplay" title="重播本幕（R）" aria-label="重播本幕">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+      <button class="icon-btn" id="btnSkip" title="下一句（→）" aria-label="下一句">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l9 7-9 7Z"/><path d="M19 5v14"/></svg>
+      </button>
+    </div>
+
+    <!-- 熊猫老师 -->
+    <button class="teacher-orb" id="teacherOrb" title="熊猫老师就在旁边" aria-label="打开熊猫老师">
+      <img src="assets/panda-teacher-v2.jpg" alt="熊猫老师" />
+    </button>
+    <div class="teacher-sheet" id="teacherSheet" role="dialog" aria-label="熊猫老师">
+      <header>
+        <img src="assets/panda-teacher-v2.jpg" alt="" />
+        <div><b><span class="bizh">熊猫老师</span><span class="biid">Guru Panda</span></b><span><span class="bizh">一直在这里 · ALWAYS NEARBY</span><span class="biid">Selalu di dekatmu</span></span></div>
+      </header>
+      <div class="t-line" id="teacherLine">需要帮忙吗？你可以让我放慢、给关键词，或者用印尼语解释一下。</div>
+      <div class="t-line-id idtx" id="teacherLineId"></div>
+      <div class="t-actions">
+        <button data-help="slower"><span class="bizh">放慢一点</span><span class="biid">Pelan sedikit</span> <small><span class="bizh">Replay slower</span><span class="biid">Putar ulang pelan</span></small></button>
+        <button data-help="keyword"><span class="bizh">给我一个关键词</span><span class="biid">Beri satu kata kunci</span> <small><span class="bizh">Key word</span><span class="biid">Kata kunci</span></small></button>
+        <button data-help="explain"><span class="bizh">用英语解释这句</span><span class="biid">Jelaskan dalam bahasa Indonesia</span> <small><span class="bizh">Explain in English</span><span class="biid">Penjelasan Indonesia</span></small></button>
+        <button data-help="help"><span class="bizh">我卡住了，帮我回答</span><span class="biid">Saya bingung, bantu jawab</span> <small><span class="bizh">Model answer</span><span class="biid">Contoh jawaban</span></small></button>
+      </div>
+    </div>
+
+    <div class="v-legend" aria-hidden="true">
+      <span>Bantuan Indonesia aktif · Arahkan kursor ke aksara: pinyin + arti</span>
+    </div>
+
+    <!-- 进度 -->
+    <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <!-- 导演解说 -->
+  <aside class="director" id="director" aria-label="导演解说面板">
+    <header>
+      <div>
+        <b>导演解说 · DIRECTOR'S CUT</b>
+        <span>这套系统的内部决定（原型为模拟）</span>
+      </div>
+      <button class="icon-btn" id="btnDirectorClose" aria-label="关闭导演解说">✕</button>
+    </header>
+    <div class="d-body">
+      <section class="d-sec">
+        <h4>本幕教学意图</h4>
+        <div class="d-grid" id="dIntent"></div>
+      </section>
+      <section class="d-sec">
+        <h4>导演决定 DirectorDecision</h4>
+        <div class="d-grid" id="dDecision"></div>
+      </section>
+      <section class="d-sec">
+        <h4>实时事件</h4>
+        <div class="d-log" id="dLog"></div>
+      </section>
+      <section class="d-sec">
+        <h4>学习证据 LearningEvidence</h4>
+        <div id="dEvidence"><div class="ev-empty">还没有证据。角色说台词只会形成「接触」，不记为掌握。</div></div>
+      </section>
+      <div class="d-note">
+        <strong>AI Chinese 生活剧场</strong> · 学习者界面可用右上角 <strong>ID</strong> 开关切换印尼语辅助：印尼语讲解 + 汉字悬停显示拼音与释义。<br>
+        本原型中，语音识别、演员语音与评估均为<strong>界面模拟</strong>；导演、演员、老师、评估四类决定按蓝图 v1.0 的 Agent 职责与状态机编排，用于评审交互与信息结构。
+      </div>
+    </div>
+  </aside>
+
+  <!-- 后台 · 排练室（零基础，可选可跳过） -->
+  <div class="rehearsal" id="rehearsal" role="dialog" aria-label="后台排练室（零基础可选）">
+    <div class="rb-card">
+      <header class="rb-head">
+        <div class="rb-kicker" id="rbKicker">Backstage · 后台排练室</div>
+        <h2 class="rb-title" id="rbTitle">先让耳朵上线，再开演</h2>
+        <p class="rb-sub" id="rbSub">3 分钟小排练：声调耳朵 + 拼音直觉 + 第一句话。全程拼音、不用认汉字，随时可以跳过。</p>
+        <div class="rb-lang" id="rbLang" role="group" aria-label="排练室语言 / Rehearsal language">
+          <button data-lang="zh" aria-pressed="false">中文</button>
+          <button data-lang="en" aria-pressed="true">English</button>
+          <button data-lang="id" aria-pressed="false">Bahasa</button>
+        </div>
+        <button class="rb-skip" id="rbSkip">跳过排练，直接开演 →</button>
+      </header>
+      <div class="rb-dots" id="rbDots" aria-hidden="true"></div>
+      <div class="rb-stage" id="rbBody"></div>
+      <footer class="rb-foot">
+        <button class="btn-ghost" id="rbPrev">← 上一步</button>
+        <button class="btn-primary" id="rbNext">下一步 →</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- 开幕幕布 -->
+  <div class="overture" id="overture">
+    <div class="o-inner">
+      <div class="o-content">
+        <div class="o-seal">海棠</div>
+        <div class="o-kicker">AI Chinese · Living Theater</div>
+        <h1 class="o-title">生活剧场</h1>
+        <div class="o-brand">AI&nbsp;CHINESE · 海棠街 · 第一季 邻里夜市</div>
+        <div class="o-hr"></div>
+        <div class="o-sub"><span class="bizh">第一集 · 新邻居 · 约 4 分钟</span><span class="biid">Episode 01 · Tetangga Baru · ± 4 menit</span></div>
+        <div class="o-en">Episode 01 — A New Neighbor · Interactive Prototype</div>
+        <div class="o-id">Episode 01 — Tetangga Baru · Prototipe interaktif</div>
+        <div class="o-cast" aria-hidden="true">
+          <img src="assets/scene-moving.jpg" alt="" />
+          <img src="assets/scene-chen.jpg" alt="" />
+          <img src="assets/scene-zhouyuan.jpg" alt="" />
+          <img src="assets/scene-alan.jpg" alt="" />
+          <img src="assets/panda-teacher-v2.jpg" alt="" />
+        </div>
+        <div class="o-actions">
+          <button class="btn-primary" id="btnStart"><span class="bizh">开 演</span><span class="biid">MULAI</span></button>
+          <button class="btn-ghost" id="btnWarmup"><span class="bizh">我学过一点 · 直接开演</span><span class="biid">Saya sudah pernah belajar · langsung mulai</span></button>
+          <button class="btn-ghost" id="btnJumpClassic"><span class="bizh">直接看看经典原型</span><span class="biid">Lihat versi klasik</span></button>
+        </div>
+        <div class="o-warmup-note" id="oWarmupNote"><span class="bizh">零基础不用担心：开演后先进 3 分钟「后台排练室」，随时可以跳过。</span><span class="biid">Pemula total? Setelah MULAI, kamu masuk «Ruang Latihan» 3 menit — bisa dilewati kapan saja.</span></div>
+        <div class="o-hint"><span class="bizh">建议全屏观看 · 可开启生成式环境音 · 右上角随时切换经典版</span><span class="biid">Disarankan mode layar penuh · Nyalakan ambiens · Ganti bahasa &amp; versi di kanan atas</span></div>
+      </div>
+    </div>
+    <div class="verture-panel l"></div>
+    <div class="verture-panel r"></div>
+  </div>
+
+  <!-- 谢幕 -->
+  <div class="curtain-call" id="curtainCall" role="dialog" aria-label="谢幕与今日回顾">
+    <div class="cc-card">
+      <div class="cc-kicker">Curtain Call · 谢幕</div>
+      <h2 class="cc-title"><span class="bizh">今天你完成了一件真事</span><span class="biid">Hari ini kamu menyelesaikan hal nyata</span></h2>
+      <p class="cc-sub">在一个新的街区，用中文认识了一个人，并且说清了自己从哪儿来。<span class="idtx block">Di lingkungan baru, kamu berkenalan dalam bahasa Mandarin dan menjelaskan dari mana asalmu.</span></p>
+
+      <div class="cc-grid" id="ccEvidence"></div>
+
+      <div class="cc-line">
+        <span><span class="bizh">值得带走的一句话</span><span class="biid">Satu kalimat untuk dibawa pulang</span></span>
+        <p>我叫 <i>＿＿</i>，我从 <i>＿＿</i> 来。</p>
+        <span class="idtx">wǒ jiào ＿＿ , wǒ cóng ＿＿ lái · Nama saya ＿＿, saya dari ＿＿.</span>
+      </div>
+
+      <div class="cc-review" id="ccReview"></div>
+
+      <div class="cc-teacher">
+        <img src="assets/panda-teacher-v2.jpg" alt="熊猫老师" />
+        <p><b><span class="bizh">熊猫老师：</span><span class="biid">Guru Panda:</span></b><span id="ccTeacherLine">今天先到这里。明天，阿岚的小餐馆会问你一个问题——我会在旁边。</span><span class="idtx" id="ccTeacherLineId"></span></p>
+      </div>
+
+      <div class="cc-invite" id="ccInvite" hidden>
+        <div>
+          <b>要不要把汉字也打开？</b>
+          <span id="ccInviteCopy">你已经听懂了好几句中文。正式版会在第 4 集自动邀请开汉字；现在也可以先试试。</span>
+        </div>
+        <div class="cc-invite-actions">
+          <button class="btn-primary" id="ccOpenHanzi">打开汉字字幕 →</button>
+          <button class="btn-ghost" id="ccKeepPinyin">先只用拼音</button>
+        </div>
+      </div>
+
+      <div class="cc-actions">
+        <button class="btn-primary" id="btnAgain"><span class="bizh">再看一遍</span><span class="biid">Tonton lagi</span></button>
+        <button class="btn-ghost" id="btnRetryTransfer"><span class="bizh">换个回答再试一次</span><span class="biid">Coba jawaban lain</span></button>
+        <button class="btn-ghost" id="btnOpenDirector2"><span class="bizh">打开导演解说</span><span class="biid">Catatan sutradara</span></button>
+        <button class="btn-ghost" id="btnSeeClassic"><span class="bizh">对比经典原型 →</span><span class="biid">Bandingkan versi klasik →</span></button>
+        <a class="btn-ghost" id="btnBackHome" href="index.html"><span class="bizh">回首页 · 确认两个偏好 →</span><span class="biid">Kembali · atur dua preferensi →</span></a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ 经典原型（原文件，原样嵌入） ============ -->
+<iframe class="classic-frame" id="classicFrame" src="classic-prototype.html" title="经典原型（App 视图）" loading="lazy"></iframe>
+<div class="classic-fallback" id="classicFallback">
+  <b>经典版没有内嵌显示</b>
+  某些浏览器不允许本地页面内嵌另一个本地文件。<br>
+  <a href="classic-prototype.html" target="_blank" rel="noopener">在新窗口打开经典原型 ↗</a>
+</div>
+<div class="classic-hint">正在查看经典原型 · 右上角开关可切回剧院版</div>
+<div class="sr" id="liveRegion" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   1. 演员表与剧本
+   ============================================================ */
+const CAST = {
+  zhou : { zh:'周远',      en:'ZHOU YUAN',     color:'var(--zhou)',  img:'assets/scene-zhouyuan.jpg' },
+  linhao:{ zh:'林浩',      en:'LIN HAO',       color:'var(--lh)',    img:'assets/scene-moving.jpg' },
+  panda: { zh:'熊猫老师',  en:'PANDA TEACHER', color:'var(--panda)', img:'assets/panda-teacher-v2.jpg' },
+  chen : { zh:'陈叔',      en:'UNCLE CHEN',    color:'var(--chen)',  img:'assets/scene-chen.jpg' },
+  alan : { zh:'阿岚',      en:'A LAN',         color:'var(--alan)',  img:'assets/scene-alan.jpg' }
+};
+
+/* 每一幕：场景、教学意图、导演决定与台词节拍
+   节拍类型：title 幕卡 / narration 旁白 / line 台词 / listen 理解检查 / speak 用户开口 / model 老师示范 / choice 迁移选择 */
+const CHAPTERS = [
+/* ---------------- 序章 ---------------- */
+{
+  id:'prologue', nav:'序章', navId:'Prolog', rail:'序章 · 黄昏', railId:'Prolog · Senja',
+  scene:{ img:'assets/scene-zhouyuan.jpg', grade:'dusk', pos:'50% 30%', cam:'drift' },
+  sceneWide:{ img:'assets/序章.png', grade:'dusk', pos:'50% 52%', cam:'drift' },
+  title:{ vertical:'序章·黄昏的海棠街', en:'PROLOGUE', sub:'Dusk on Haitang Street', idSub:'Senja di Jalan Haitang' },
+  intent:{ goal:'进入世界：今天这条街上发生了什么', competency:'可理解输入（情境 + 少量真实对白）',
+    evidence:'接触证据，不记为掌握', policy:'不要求参与；先让人物和事件成立' },
+  decision:{ mode:'story_card', cast:'周远', media:'still_scene + narration', fallback:'narration' },
+  beats:[
+    { t:'title', dur:3000 },
+    { t:'narration', dur:4200,
+      zh:'傍晚六点，海棠街的灯笼一盏一盏亮起来。',
+      en:'At six in the evening, the lanterns of Haitang Street come on one by one.',
+      id:'Pukul enam sore, lampion di Jalan Haitang menyala satu per satu.' },
+    { t:'narration', dur:4400,
+      zh:'有人搬走，有人搬来。今天，这条街上多了一个新邻居——就是你。',
+      en:'People move out; people move in. Today the street has one more new neighbor — you.',
+      id:'Ada yang pindah keluar, ada yang pindah masuk. Hari ini jalan ini kedatangan satu tetangga baru — kamu.' },
+    { t:'line', who:'zhou', dur:3600, cam:'push',
+      zh:'夜市还差最后一盏灯……今晚一定要亮起来。',
+      py:'Yèshì hái chà zuìhòu yì zhǎn dēng… jīnwǎn yídìng yào liàng qǐlái.',
+      en:'The night market still needs one last lamp… it has to light up tonight.',
+      id:'Pasar malam tinggal kurang satu lampu terakhir… malam ini harus menyala.' }
+  ]
+},
+/* ---------------- 第一幕 ---------------- */
+{
+  id:'act1', nav:'第一幕', navId:'Babak 1', rail:'第一幕 · 楼道', railId:'Babak 1 · Koridor',
+  scene:{ img:'assets/scene-moving.jpg', grade:'hall', pos:'50% 28%', cam:'push' },
+  sceneWide:{ img:'assets/第一幕.png', grade:'hall', pos:'50% 48%', cam:'pushslow' },
+  title:{ vertical:'第一幕·楼道', en:'ACT ONE', sub:'The hallway', idSub:'Koridor apartemen' },
+  intent:{ goal:'在真实情境里第一次听懂中文问候', competency:'听力理解：你是……吗？／新搬来的',
+    evidence:'理解证据（可选支持级别）', policy:'先理解再表达；三组 TPRS 追问（是/否 → 二选一 → 谁）逐步收紧，不要求开口' },
+  decision:{ mode:'actor_scene', cast:'林浩', media:'still_scene + realtime_voice', fallback:'teacher_explain' },
+  beats:[
+    { t:'title', dur:2800 },
+    { t:'line', who:'linhao', dur:4200, cam:'push',
+      zh:'你好！你是新搬来的吗？',
+      py:'Nǐ hǎo! Nǐ shì xīn bān lái de ma?',
+      en:'Hi! Are you the new neighbor?',
+      id:'Halo! Kamu yang baru pindah ke sini, ya?' },
+    /* TPRS 追问 1/3 · 是/否 */
+    { t:'circle', step:1, kind:'yn', who:'linhao', target:'你是新搬来的吗？',
+      zh:'门口这么多纸箱……你是新搬来的，对不对？',
+      py:'Ménkǒu zhème duō zhǐxiāng… nǐ shì xīn bān lái de, duì bu duì?',
+      en:'So many boxes at the door… you just moved in, right?',
+      id:'Banyak kardus di depan pintu… kamu baru pindah, benar kan?',
+      options:[
+        { zh:'对，我是新搬来的', py:'Duì, wǒ shì xīn bān lái de', en:'Yes, I just moved in', id:'Ya, saya baru pindah', ok:true },
+        { zh:'不对，我住了很久了', py:'Bú duì, wǒ zhù le hěn jiǔ le', en:'No, I have lived here a long time', id:'Bukan, saya sudah lama di sini' }
+      ],
+      ok:{ zh:'对，新邻居！欢迎欢迎。', py:'Duì, xīn línjū! Huānyíng huānyíng.', en:'Right — a new neighbor! Welcome.', id:'Benar, tetangga baru! Selamat datang.' },
+      no:{ zh:'没关系，我再说慢一点——', py:'Méi guānxi, wǒ zài shuō màn yìdiǎn——', en:'No worries — let me say it slower —', id:'Tidak apa-apa, saya ucapkan lebih pelan —' },
+      competency:'听懂确认问句：你是新搬来的，对不对？' },
+    /* TPRS 追问 2/3 · 二选一 */
+    { t:'circle', step:2, kind:'ab', who:'linhao', target:'你是新搬来的吗？',
+      zh:'你是新搬来的，还是老邻居？',
+      py:'Nǐ shì xīn bān lái de, háishi lǎo línjū?',
+      en:'Are you new here, or an old neighbor?',
+      id:'Kamu baru pindah, atau tetangga lama?',
+      options:[
+        { zh:'新搬来的 📦', py:'xīn bān lái de', en:'just moved in', id:'baru pindah', ok:true },
+        { zh:'老邻居 🏠', py:'lǎo línjū', en:'an old neighbor', id:'tetangga lama' }
+      ],
+      ok:{ zh:'哦——新搬来的。我说嘛。', py:'Ó—— xīn bān lái de. Wǒ shuō ma.', en:'Oh — you just moved in. I figured.', id:'Oh — jadi kamu baru pindah. Pantas.' },
+      no:{ zh:'嗯？我们再看一次——', py:'Ǹg? Wǒmen zài kàn yí cì——', en:'Hm? Let us look again —', id:'Hm? Kita lihat sekali lagi —' },
+      competency:'听懂二选一：新搬来的／老邻居' },
+    /* TPRS 追问 3/3 · 谁 */
+    { t:'circle', step:3, kind:'who', who:'linhao', target:'你是新搬来的吗？',
+      zh:'那——谁是刚搬来的？是你，还是我？',
+      py:'Nà—— shéi shì gāng bān lái de? Shì nǐ, háishi wǒ?',
+      en:'So — who just moved here? You, or me?',
+      id:'Jadi — siapa yang baru pindah? Kamu, atau saya?',
+      options:[
+        { zh:'是我 👋', py:'shì wǒ', en:'me', id:'saya', ok:true },
+        { zh:'是你 🤝', py:'shì nǐ', en:'you', id:'kamu' }
+      ],
+      ok:{ zh:'对，是你。你刚搬来，我住三楼。', py:'Duì, shì nǐ. Nǐ gāng bān lái, wǒ zhù sān lóu.', en:'Right, it is you. You just moved in; I am on the third floor.', id:'Benar, kamu. Kamu baru pindah; saya di lantai tiga.' },
+      no:{ zh:'慢慢来，是我问你——', py:'Mànman lái, shì wǒ wèn nǐ——', en:'Take it easy — I am the one asking —', id:'Pelan-pelan, saya yang bertanya —' },
+      competency:'听懂谁问句：是谁刚搬来的' },
+    { t:'listen', id:'listen1',
+      prompt:'林浩最想确认的是什么？', idPrompt:'Apa yang paling ingin Lin Hao pastikan?',
+      options:[
+        { zh:'你是不是新搬来的', py:'Nǐ shì bu shì xīn bān lái de', en:'whether you just moved in', id:'apakah kamu baru pindah', ok:true },
+        { zh:'你叫什么名字', py:'Nǐ jiào shénme míngzi', en:'what your name is', id:'siapa namamu' },
+        { zh:'你从哪儿来', py:'Nǐ cóng nǎr lái', en:'where you are from', id:'dari mana asalmu' }
+      ],
+      okCopy:'三句追问之后，你已经能抓住「新搬来的」。这是你今天听懂的第一句中文。',
+      okCopyId:'Setelah tiga pertanyaan konfirmasi, kamu menangkap «xīn bān lái de» — baru pindah. Kalimat Mandarin pertama yang kamu pahami hari ini.',
+      noCopy:'没关系，再听一次。「新搬来的」就是「新来的邻居」。',
+      noCopyId:'Tidak apa-apa, dengarkan sekali lagi. «xīn bān lái de» artinya tetangga yang baru datang.',
+      competency:'听力理解：你是新搬来的吗？' },
+    { t:'line', who:'linhao', dur:4000, cam:'hold',
+      zh:'我就住在三楼，304。有事就来敲门。',
+      py:'Wǒ jiù zhù zài sān lóu, sān líng sì. Yǒu shì jiù lái qiāo mén.',
+      en:'I live on the third floor, 304. Knock if you need anything.',
+      id:'Saya tinggal di lantai tiga, nomor 304. Kalau ada perlu, ketuk saja pintu saya.' }
+  ]
+},
+/* ---------------- 第二幕 ---------------- */
+{
+  id:'act2', nav:'第二幕', navId:'Babak 2', rail:'第二幕 · 门口', railId:'Babak 2 · Depan pintu',
+  scene:{ img:'assets/scene-moving.jpg', grade:'hall', pos:'50% 30%', cam:'hold' },
+  sceneWide:{ img:'assets/第一幕.png', grade:'hall', pos:'50% 44%', cam:'pushslow' },
+  title:{ vertical:'第二幕·门口', en:'ACT TWO', sub:'At the door', idSub:'Di depan pintu' },
+  intent:{ goal:'第一次用中文说出自己的名字', competency:'口语：我叫……',
+    evidence:'口语证据（独立 / 关键词 / 复述 / 选项）', policy:'支持阶梯：等待 → 示范 → 关键词 → 选项；不追问、不施压' },
+  decision:{ mode:'actor_prompt', cast:'林浩', media:'realtime_voice', fallback:'teacher_model' },
+  beats:[
+    { t:'title', dur:2600 },
+    { t:'line', who:'linhao', dur:3400, cam:'hold',
+      zh:'你叫什么名字？',
+      py:'Nǐ jiào shénme míngzi?',
+      en:'What is your name?',
+      id:'Siapa namamu?' },
+    { t:'speak', id:'name', dur:0,
+      prompt:'用中文告诉他你的名字', idPrompt:'Katakan namamu dalam bahasa Mandarin',
+      target:'我叫 Emma。', targetPy:'Wǒ jiào Emma.', targetEn:'My name is Emma.',
+      idTarget:'Nama saya Emma.',
+      keywords:'我叫 ＿＿', idKeywords:'wǒ jiào = nama saya …',
+      model:{ who:'panda', zh:'我叫 Emma。', py:'Wǒ jiào Emma.', en:'My name is Emma.', id:'Nama saya Emma.' },
+      options:[
+        { zh:'我叫 Emma。', py:'Wǒ jiào Emma.', en:'My name is Emma.', id:'Nama saya Emma.' },
+        { zh:'我是 Emma。', py:'Wǒ shì Emma.', en:'I am Emma.', id:'Saya Emma.', level:'keyword' }
+      ],
+      competency:'口语：我叫……',
+      result:[
+        { t:'line', who:'linhao', dur:4000, cam:'push',
+          zh:'我叫林浩。很高兴认识你！',
+          py:'Wǒ jiào Lín Hào. Hěn gāoxìng rènshi nǐ!',
+          en:'I am Lin Hao. Nice to meet you!',
+          id:'Nama saya Lin Hao. Senang berkenalan denganmu!' }
+      ]
+    },
+    { t:'narration', dur:4200,
+      zh:'楼道里的灯亮着。你们的第一次对话，就这样开始了。',
+      en:'The hallway light stays on. Your first conversation has begun.',
+      id:'Lampu koridor masih menyala. Percakapan pertamamu dimulai begitu saja.' }
+  ]
+},
+/* ---------------- 幕间 ---------------- */
+{
+  id:'interlude', nav:'幕间', navId:'Jeda', rail:'幕间 · 熊猫老师说', railId:'Jeda · Guru Panda',
+  scene:{ img:'assets/panda-teacher-v2.jpg', grade:'stage', pos:'50% 42%', cam:'stageIn', fit:'contain' },
+  sceneWide:{ img:'assets/幕间.png', grade:'stage', pos:'50% 50%', cam:'pushslow' },
+  title:{ vertical:'幕间·熊猫老师说', en:'INTERLUDE', sub:'The panda teacher steps in', idSub:'Guru Panda masuk panggung' },
+  intent:{ goal:'给一个更自然、可替换的完整句', competency:'口语：我叫……，我从……来',
+    evidence:'示范后复述（model 支持级别）', policy:'一次只给一个句式；先说名字，再说来处' },
+  decision:{ mode:'teacher_explain', cast:'熊猫老师', media:'realtime_voice', fallback:'story_card' },
+  beats:[
+    { t:'title', dur:2800 },
+    { t:'line', who:'panda', dur:3600, cam:'hold',
+      zh:'说得不错。想更自然一点，可以这样说——',
+      py:'Shuō de búcuò. Xiǎng gèng zìrán yìdiǎn, kěyǐ zhèyàng shuō——',
+      en:'Not bad. To sound more natural, you can say it like this —',
+      id:'Bagus. Kalau mau terdengar lebih alami, bisa bilang begini —' },
+    { t:'model', id:'model1', dur:0,
+      zh:'我叫 Emma，我从 London 来。',
+      py:'Wǒ jiào Emma, wǒ cóng London lái.',
+      en:'My name is Emma. I am from London.',
+      id:'Nama saya Emma, saya dari London.',
+      chunks:[
+        { zh:'我叫…', note:'先说名字', id:'sebutkan nama dulu' },
+        { zh:'我从…来', note:'再说从哪儿来', id:'lalu sebutkan dari mana' }
+      ],
+      note:'中文的顺序很简单：先说名字，再说来处。你是从哪儿来的，就把它放进中间。',
+      idNote:'Urutan bahasa Mandarin sederhana: sebutkan nama dulu, lalu asalmu. Dari mana pun kamu berasal, taruh di tengah.',
+      competency:'口语：我叫……，我从……来' },
+    { t:'speak', id:'repeat', dur:0, mode:'repeat',
+      prompt:'跟着说一次——可以换成你的真名和城市', idPrompt:'Ulangi sekali — ganti dengan nama dan kotamu yang sebenarnya',
+      target:'我叫 Emma，我从 London 来。', targetPy:'Wǒ jiào Emma, wǒ cóng London lái.', targetEn:'My name is Emma. I am from London.',
+      idTarget:'Nama saya Emma, saya dari London.',
+      keywords:'我叫 ＿＿，我从 ＿＿ 来', idKeywords:'wǒ jiào ＿＿ , wǒ cóng ＿＿ lái',
+      competency:'口语：我叫……，我从……来',
+      result:[
+        { t:'line', who:'panda', dur:3800, cam:'hold',
+          zh:'很好，这句你已经能自己用了。',
+          py:'Hěn hǎo, zhè jù nǐ yǐjīng néng zìjǐ yòng le.',
+          en:'Good — you can use this sentence on your own now.',
+          id:'Bagus, kalimat ini sudah bisa kamu pakai sendiri.' }
+      ] }
+  ]
+},
+/* ---------------- 第三幕 ---------------- */
+{
+  id:'act3', nav:'第三幕', navId:'Babak 3', rail:'第三幕 · 小广场', railId:'Babak 3 · Lapangan kecil',
+  scene:{ img:'assets/scene-chen.jpg', grade:'square', pos:'50% 30%', cam:'push' },
+  sceneWide:{ img:'assets/第三幕.png', grade:'square', pos:'50% 50%', cam:'drift' },
+  title:{ vertical:'第三幕·小广场', en:'ACT THREE', sub:'The small square', idSub:'Lapangan kecil' },
+  intent:{ goal:'换个人、换个问法，再完成一次同样的能力', competency:'迁移：我从……来',
+    evidence:'迁移证据（最高价值：新人物 + 新目的 + 新问法）', policy:'默认不给提示；选择即代表当时真实能用的支持级别' },
+  decision:{ mode:'actor_scene', cast:'陈叔', media:'still_scene + realtime_voice', fallback:'teacher_model' },
+  beats:[
+    { t:'title', dur:2800 },
+    { t:'line', who:'chen', dur:4600, cam:'push',
+      zh:'晚上一起去小广场吧。你是从哪儿来的？',
+      py:'Wǎnshang yìqǐ qù xiǎo guǎngchǎng ba. Nǐ shì cóng nǎr lái de?',
+      en:'Let us go to the small square tonight. Where are you from?',
+      id:'Nanti malam ikut ke lapangan kecil, yuk. Kamu dari mana?' },
+    { t:'choice', id:'transfer1', dur:0,
+      prompt:'换个地方，换个人——再说一次', idPrompt:'Ganti tempat, ganti orang — katakan sekali lagi',
+      competency:'迁移：我从……来',
+      options:[
+        { zh:'我从 London 来。', py:'Wǒ cóng London lái.', en:'I am from London.', id:'Saya dari London.', level:'independent',
+          result:[
+            { t:'line', who:'chen', dur:4400, cam:'push',
+              zh:'London 来的邻居——欢迎你。我在这条街住了六十多年。',
+              py:'London lái de línjū——huānyíng nǐ. Wǒ zài zhè tiáo jiē zhù le liùshí duō nián.',
+              en:'A neighbor from London — welcome. I have lived on this street for over sixty years.',
+              id:'Tetangga dari London — selamat datang. Saya sudah tinggal di jalan ini lebih dari enam puluh tahun.' }
+          ] },
+        { zh:'我…… London。', py:'Wǒ… London.', en:'I… London.', id:'Saya… London.', level:'keyword',
+          result:[
+            { t:'line', who:'chen', dur:3600, cam:'hold',
+              zh:'London？好地方。今晚来小广场，我们再慢慢聊。',
+              py:'London? Hǎo dìfang. Jīnwǎn lái xiǎo guǎngchǎng, wǒmen zài mànman liáo.',
+              en:'London? Nice place. Come to the square tonight and we can talk slowly.',
+              id:'London? Tempat bagus. Nanti malam datang ke lapangan kecil, kita ngobrol pelan-pelan.' },
+            { t:'line', who:'panda', dur:3600, cam:'hold',
+              zh:'下一次，可以试着说完整的句子：「我从 London 来」。',
+              py:'Xià yícì, kěyǐ shìzhe shuō wánzhěng de jùzi: Wǒ cóng London lái.',
+              en:'Next time, try the full sentence: I am from London.',
+              id:'Lain kali, coba ucapkan kalimat lengkapnya: wǒ cóng London lái — saya dari London.' }
+          ] },
+        { zh:'I am from London.', py:'（先用英语说了）', en:'Spoken in English first.', id:'Dijawab dalam bahasa Inggris dulu.', level:'translation',
+          result:[
+            { t:'line', who:'chen', dur:3200, cam:'hold',
+              zh:'……嗯？',
+              py:'…Ńg?',
+              en:'…Hm?',
+              id:'…Hm?' },
+            { t:'line', who:'panda', dur:4200, cam:'hold',
+              zh:'他问的是「你是从哪儿来的」。试着说——「我从 London 来」。',
+              py:'Tā wèn de shì “nǐ shì cóng nǎr lái de”. Shìzhe shuō——“Wǒ cóng London lái.”',
+              en:'He is asking: where are you from? Try saying: I am from London.',
+              id:'Dia bertanya: kamu dari mana? Coba bilang — wǒ cóng London lái, saya dari London.' },
+            { t:'speak', id:'retry', dur:0, mode:'retry',
+              prompt:'现在轮到你了，再说一次', idPrompt:'Sekarang giliranmu, coba sekali lagi',
+              target:'我从 London 来。', targetPy:'Wǒ cóng London lái.', targetEn:'I am from London.',
+              idTarget:'Saya dari London.',
+              keywords:'我从 ＿＿ 来', idKeywords:'wǒ cóng ＿＿ lái',
+              competency:'迁移：我从……来',
+              result:[
+                { t:'line', who:'chen', dur:4000, cam:'push',
+                  zh:'好！听懂了。London 来的邻居，欢迎你。',
+                  py:'Hǎo! Tīng dǒng le. London lái de línjū, huānyíng nǐ.',
+                  en:'Good! I understood. A neighbor from London, welcome.',
+                  id:'Bagus! Saya mengerti. Tetangga dari London, selamat datang.' }
+              ] }
+          ] }
+      ] }
+  ]
+},
+/* ---------------- 第四幕 ---------------- */
+{
+  id:'act4', nav:'第四幕', navId:'Babak 4', rail:'第四幕 · 夜市灯亮', railId:'Babak 4 · Pasar malam',
+  scene:{ img:'assets/scene-zhouyuan.jpg', grade:'market', pos:'50% 32%', cam:'drift' },
+  sceneWide:{ img:'assets/第四幕.png', grade:'market', pos:'50% 48%', cam:'drift' },
+  title:{ vertical:'第四幕·夜市灯亮', en:'ACT FOUR', sub:'The market lights up', idSub:'Lampu pasar malam menyala' },
+  intent:{ goal:'让语言产生可见的结果，把新邻居变成街上的一个人', competency:'关系与连续性（不新增语言目标）',
+    evidence:'故事结果，不产生掌握证据', policy:'人物记住用户；事件向前推进，留给下一集' },
+  decision:{ mode:'world_branch', cast:'周远 / 阿岚 / 陈叔', media:'still_scene + realtime_voice', fallback:'story_card' },
+  beats:[
+    { t:'title', dur:2800 },
+    { t:'line', who:'zhou', dur:4200, cam:'push',
+      zh:'灯亮了。今晚的夜市，就等这一盏。',
+      py:'Dēng liàng le. Jīnwǎn de yèshì, jiù děng zhè yì zhǎn.',
+      en:'The lamp is lit. Tonight the market was waiting for this one.',
+      id:'Lampunya menyala. Pasar malam malam ini menunggu yang satu ini.' },
+    { t:'line', who:'alan', dur:4000, cam:'pushslow',
+      scene:{ img:'assets/scene-alan.jpg', grade:'shop', pos:'50% 32%' },
+      zh:'新邻居？进来坐，我给你倒杯茶。',
+      py:'Xīn línjū? Jìnlái zuò, wǒ gěi nǐ dào bēi chá.',
+      en:'The new neighbor? Come in and sit, I will pour you some tea.',
+      id:'Tetangga baru? Masuk, duduk. Saya buatkan teh.' },
+    { t:'line', who:'chen', dur:4200, cam:'hold',
+      scene:{ img:'assets/scene-chen.jpg', grade:'square', pos:'50% 30%' },
+      zh:'照片里，多了一个新邻居。',
+      py:'Zhàopiàn lǐ, duō le yí gè xīn línjū.',
+      en:'There is one more new neighbor in the photograph now.',
+      id:'Di dalam foto, ada satu tetangga baru.' },
+    { t:'narration', dur:4800,
+      zh:'你还没说很多中文。但从今天起，你不再只是一个路过的人。',
+      en:'You do not speak much Chinese yet. But from today, you are no longer just someone passing by.',
+      id:'Kamu belum banyak bicara bahasa Mandarin. Tapi mulai hari ini, kamu bukan lagi sekadar orang yang lewat.' },
+    { t:'narration', dur:4000,
+      scene:{ img:'assets/第四幕.png', grade:'shop', pos:'50% 52%', cam:'pushslow' },
+      zh:'下一次，阿岚的小餐馆会问你一个问题。',
+      en:'Next time, A Lan small restaurant will ask you a question.',
+      id:'Lain kali, restoran kecil A Lan akan menanyakan sesuatu padamu.' }
+  ]
+}
+];
+
+/* 复习安排（谢幕卡片） */
+const REVIEW_PLAN = [
+  { day:'1 天后 · 明天', dayId:'1 hari lagi · besok', desc:'林浩换个问法再问一次你的名字和来处。',
+    descId:'Lin Hao bertanya lagi dengan cara lain: nama dan asalmu.', tag:'same context · new wording' },
+  { day:'3 天后', dayId:'3 hari lagi', desc:'阿岚的小餐馆里，换个地点和目的，再说一次偏好。',
+    descId:'Di restoran A Lan, ganti tempat dan tujuan: ungkapkan preferensi sekali lagi.', tag:'new person · new place' },
+  { day:'7 天后', dayId:'7 hari lagi', desc:'夜市的邀请里，用一次「我从……来」介绍自己。',
+    descId:'Dalam undangan pasar malam, pakai «wǒ cóng … lái» untuk memperkenalkan diri.', tag:'new purpose · transfer' }
+];
+
+/* ============================================================
+   2. 基础状态与工具
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+const el = {
+  chrome:$('chrome'), theater:$('theater'), layerA:$('layerA'), layerB:$('layerB'), imgA:$('imgA'), imgB:$('imgB'),
+  grade:$('grade'), spot:$('spot'), motes:$('motes'), veil:$('veil'),
+  subs:$('subs'), subsWho:$('subsWho'), subsId:$('subsId'), narrId:$('narrId'), actCardSubId:$('actCardSubId'),
+  btnId:$('btnId'), teacherLineId:$('teacherLineId'), subsWhoEn:$('subsWhoEn'), subsZh:$('subsZh'), subsPy:$('subsPy'), subsEn:$('subsEn'),
+  narration:$('narration'), narrZh:$('narrZh'), narrEn:$('narrEn'),
+  actCard:$('actCard'), actCardVertical:$('actCardVertical'), actCardEn:$('actCardEn'), actCardSub:$('actCardSub'),
+  apron:$('apron'), apronHint:$('apronHint'), apronTarget:$('apronTarget'), apronMain:$('apronMain'),
+  micBtn:$('micBtn'), micLabel:$('micLabel'), optionRow:$('optionRow'), apronTools:$('apronTools'),
+  apronFeedback:$('apronFeedback'), fbIcon:$('fbIcon'), fbTitle:$('fbTitle'), fbCopy:$('fbCopy'), fbChips:$('fbChips'),
+  actRail:$('actRail'), progressBar:$('progressBar'), toast:$('toast'), live:$('liveRegion'),
+  teacherSheet:$('teacherSheet'), teacherLine:$('teacherLine'),
+  director:$('director'), dIntent:$('dIntent'), dDecision:$('dDecision'), dLog:$('dLog'), dEvidence:$('dEvidence'),
+  overture:$('overture'), curtainCall:$('curtainCall'), ccEvidence:$('ccEvidence'), ccReview:$('ccReview'),
+  btnPlay:$('btnPlay'), iconPlay:$('iconPlay'), btnDirector:$('btnDirector'), btnSound:$('btnSound'),
+  btnPinyin:$('btnPinyin'), btnEnglish:$('btnEnglish'), btnHanzi:$('btnHanzi'), btnFull:$('btnFull'),
+  narrPy:$('narrPy'), actCardVerticalPy:$('actCardVerticalPy'),
+  circleBar:$('circleBar'), circleOptions:$('circleOptions'),
+  rehearsal:$('rehearsal'), rbBody:$('rbBody'), rbDots:$('rbDots'), rbPrev:$('rbPrev'), rbNext:$('rbNext'),
+  rbKicker:$('rbKicker'), rbTitle:$('rbTitle'), rbSub:$('rbSub'), rbLang:$('rbLang'),
+  ccInvite:$('ccInvite'),
+  modeTheater:$('modeTheater'), modeClassic:$('modeClassic'), classicFrame:$('classicFrame'),
+  classicFallback:$('classicFallback')
+};
+
+const CLASSIC_MAP = {
+  prologue:'World / 街区首页 · 今日事件',
+  act1:'Episode · Scene 1 of 4（Understand first）',
+  act2:'Episode · Scene 2 of 4（Try it in Chinese）',
+  interlude:'Episode · Scene 3 of 4（Teacher model）',
+  act3:'Episode · Scene 4 of 4（Make a choice）',
+  act4:'Recap · 故事反馈与课后任务'
+};
+const SUPPORT_LABEL = {
+  independent:'独立完成', slower:'放慢后完成', keyword:'借助关键词', pinyin:'借助拼音',
+  model:'示范后复述', translation:'借助英语翻译', watched:'只是观看'
+};
+const CONTEXT_ID = {
+  '林浩 · 楼道':'Lin Hao · Koridor',
+  '林浩 · 门口':'Lin Hao · Depan pintu',
+  '熊猫老师 · 幕间复述':'Guru Panda · Jeda (mengulang)',
+  '陈叔 · 小广场（新人物 / 新问法）':'Chen Shu · Lapangan kecil (orang & pertanyaan baru)',
+  '陈叔 · 小广场（第二次尝试）':'Chen Shu · Lapangan kecil (percobaan kedua)',
+  '陈叔 · 小广场':'Chen Shu · Lapangan kecil'
+};
+const SUPPORT_LABEL_ID = {
+  independent:'Mandiri', slower:'Setelah diperlambat', keyword:'Dengan kata kunci', pinyin:'Dengan pinyin',
+  model:'Mengulang setelah contoh', translation:'Dengan terjemahan Inggris', watched:'Hanya menonton'
+};
+const SUPPORT_CLASS = {
+  independent:'ind', slower:'sup', keyword:'sup', pinyin:'sup', model:'sup', translation:'sup', watched:'watch'
+};
+
+const state = {
+  mode:'theater', playing:true, started:false,
+  chapter:0, beats:null, i:0, timer:null,
+  dur:0, t0:0, remain:0,
+  imgSrc:null, cur:'A', activeLayer:null, activeImg:null,
+  evidence:[], visited:new Set(),
+  userBeat:null, listening:false, support:null,
+  log:[], sound:false, dimTimer:null,
+  textPreset:'zero', warmupDone:false, episodeCount:0,
+  lineSeq:0, circleTimer:null, circleTry:0
+};
+
+/* ---------- v0.3 零基础支持：本地设置 / 设备语音 / 字幕分层 ---------- */
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : v; }catch(_){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, v); }catch(_){} }
+};
+const ZERO = () => document.body.classList.contains('no-hanzi');
+const TTS = {
+  ok(){ return ('speechSynthesis' in window); },
+  speak(text, rate=0.82){
+    if (!this.ok()) return false;
+    try{
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'zh-CN'; u.rate = rate; u.pitch = 1;
+      const vs = speechSynthesis.getVoices() || [];
+      const v = vs.find(x=>/zh[-_]?CN|Tingting|Meijia/i.test(x.name+' '+x.lang)) || vs.find(x=>/^zh/i.test(x.lang));
+      if (v) u.voice = v;
+      speechSynthesis.speak(u);
+      return true;
+    }catch(_){ return false; }
+  }
+};
+
+/* 由逐字拼音表生成整句拼音（旁白 / 幕卡在零基础档使用） */
+function pinyinize(text){
+  let out = '';
+  segmentText(text).forEach(seg=>{
+    const han = /[\u4e00-\u9fff]/.test(seg.t);
+    if (han && out && !/\s$/.test(out)) out += ' ';
+    out += han ? (seg.py || seg.t) : seg.t;
+  });
+  return out
+    .replace(/[，、]/g, ', ').replace(/。/g, '. ').replace(/！/g, '! ')
+    .replace(/？/g, '? ').replace(/；/g, '; ').replace(/：/g, ': ')
+    .replace(/——/g, ' — ').replace(/·/g, ' · ')
+    .replace(/\s+/g, ' ').trim();
+}
+function persistLayers(){
+  LS.set('ht.noHanzi', document.body.classList.contains('no-hanzi') ? '1' : '0');
+  LS.set('ht.noPinyin', document.body.classList.contains('no-pinyin') ? '1' : '0');
+}
+function setHanzi(on){
+  document.body.classList.toggle('no-hanzi', !on);
+  setToggle(el.btnHanzi, on);
+  persistLayers();
+}
+function applyTextPreset(name){
+  state.textPreset = name;
+  LS.set('ht.preset', name);
+  document.body.classList.remove('no-pinyin'); setToggle(el.btnPinyin, true);
+  setHanzi(name !== 'zero');
+  if (state.beats) renderDecision(CHAPTERS[state.chapter]);
+  logEvent('老师', name === 'zero' ? '零基础档：全拼音 · 去汉字' : '默认档：汉字 + 拼音',
+    name === 'zero'
+      ? '正文以拼音为主，英文/印尼语译文常显；汉字可用右上角「字」或按 H 随时打开。'
+      : '正文为汉字 + 拼音；第 4 集起系统会自动邀请升级。',
+    'var(--panda)');
+}
+
+/* ---------- 语言支持：逐字拼音 + 词组印尼语释义 ---------- */
+const CHAR_PY = (()=>{ const m={};
+  '一yī 三sān 上shàng 下xià 不bù 与yǔ 世shì 个gè 中zhōng 为wèi 么me 了le 事shì 二èr 产chǎn 亮liàng 人rén 什shén 今jīn 从cóng 他tā 代dài 以yǐ 们men 件jiàn 价jià 会huì 但dàn 住zhù 你nǐ 倒dào 候hòu 值zhí 傍bàng 儿ér 先xiān 入rù 六liù 关guān 兴xìng 再zài 出chū 别bié 到dào 前qián 力lì 十shí 单dān 即jí 压yā 去qù 参cān 发fā 叔shū 变biàn 口kǒu 句jù 只zhǐ 叫jiào 可kě 同tóng 名míng 后hòu 向xiàng 吗ma 吧ba 听tīng 告gào 周zhōu 和hé 哪nǎ 嗯ng 四sì 在zài 地dì 场chǎng 坐zuò 城chéng 境jìng 增zēng 处chù 复fù 多duō 夜yè 天tiān 好hǎo 始shǐ 子zi 字zì 它tā 完wán 定dìng 实shí 对duì 小xiǎo 少shǎo 就jiù 居jū 岚lán 差chà 己jǐ 已yǐ 市shì 师shī 幕mù 年nián 广guǎng 序xù 开kāi 式shì 当dāng 待dài 很hěn 得de 性xìng 情qíng 想xiǎng 慢màn 懂dǒng 成chéng 我wǒ 户hù 把bǎ 抓zhuā 择zé 持chí 换huàn 据jù 掌zhǎng 接jiē 推tuī 提tí 握wò 搬bān 支zhī 放fàng 故gù 敲qiāo 整zhěng 文wén 新xīn 方fāng 施shī 时shí 昏hūn 是shì 晚wǎn 更gèng 替tì 最zuì 有yǒu 本běn 条tiáo 来lái 杯bēi 林lín 果guǒ 标biāo 样yàng 梯tī 棠táng 楼lóu 次cì 欢huān 求qiú 没méi 法fǎ 浩hào 海hǎi 灯dēng 点diǎn 然rán 照zhào 熊xióng 片piàn 物wù 独dú 猫māo 现xiàn 理lǐ 生shēng 用yòng 界jiè 留liú 白bái 的de 盏zhǎn 目mù 真zhēn 着zhe 示shì 移yí 立lì 章zhāng 第dì 笼lóng 等děng 简jiǎn 系xì 级jí 经jīng 结jié 给gěi 续xù 老lǎo 聊liáo 能néng 自zì 英yīng 范fàn 茶chá 街jiē 表biǎo 要yào 见jiàn 解jiě 触chù 言yán 认rèn 让ràng 记jì 证zhèng 识shí 诉sù 词cí 试shì 话huà 语yǔ 说shuō 走zǒu 起qǐ 跟gēn 路lù 轮lún 输shū 达dá 迁qiān 过guò 迎yíng 还hái 这zhè 进jìn 远yuǎn 连lián 述shù 追zhuī 选xuǎn 道dào 邻lín 里lǐ 量liàng 错cuò 键jiàn 门mén 问wèn 间jiān 阶jiē 阿ā 陈chén 集jí 项xiàng 顺shùn 题tí 餐cān 馆guǎn 高gāo 黄huáng 默mò'
+    .split(' ').forEach(x=>{ if(x.length>1) m[x[0]] = x.slice(1); });
+  return m; })();
+
+const WORD_GLOSS = {
+  '你好':{py:'nǐ hǎo', id:'halo'},
+  '新搬来的':{py:'xīn bān lái de', id:'baru pindah ke sini'},
+  '搬来':{py:'bān lái', id:'pindah ke sini'},
+  '新邻居':{py:'xīn línjū', id:'tetangga baru'},
+  '邻居':{py:'línjū', id:'tetangga'},
+  '夜市':{py:'yèshì', id:'pasar malam'},
+  '灯笼':{py:'dēnglong', id:'lampion'},
+  '一盏灯':{py:'yì zhǎn dēng', id:'satu lampu'},
+  '亮起来':{py:'liàng qǐlái', id:'menyala'},
+  '叫什么名字':{py:'jiào shénme míngzi', id:'siapa namamu'},
+  '名字':{py:'míngzi', id:'nama'},
+  '我叫':{py:'wǒ jiào', id:'nama saya …'},
+  '我是':{py:'wǒ shì', id:'saya adalah'},
+  '我从':{py:'wǒ cóng', id:'saya dari'},
+  '从哪儿来':{py:'cóng nǎr lái', id:'dari mana (asalnya)'},
+  '很高兴认识你':{py:'hěn gāoxìng rènshi nǐ', id:'senang berkenalan denganmu'},
+  '认识':{py:'rènshi', id:'berkenalan, mengenal'},
+  '我们':{py:'wǒmen', id:'kami, kita'},
+  '你们':{py:'nǐmen', id:'kalian'},
+  '晚上':{py:'wǎnshang', id:'malam'},
+  '一起':{py:'yìqǐ', id:'bersama-sama'},
+  '小广场':{py:'xiǎo guǎngchǎng', id:'lapangan kecil'},
+  '广场':{py:'guǎngchǎng', id:'lapangan'},
+  '好地方':{py:'hǎo dìfang', id:'tempat bagus'},
+  '地方':{py:'dìfang', id:'tempat'},
+  '慢慢':{py:'mànman', id:'pelan-pelan'},
+  '下一次':{py:'xià yí cì', id:'lain kali'},
+  '完整的':{py:'wánzhěng de', id:'yang lengkap'},
+  '句子':{py:'jùzi', id:'kalimat'},
+  '三楼':{py:'sān lóu', id:'lantai tiga'},
+  '敲门':{py:'qiāo mén', id:'mengetuk pintu'},
+  '欢迎你':{py:'huānyíng nǐ', id:'selamat datang'},
+  '欢迎':{py:'huānyíng', id:'selamat datang'},
+  '照片里':{py:'zhàopiàn lǐ', id:'di dalam foto'},
+  '照片':{py:'zhàopiàn', id:'foto'},
+  '中文':{py:'zhōngwén', id:'bahasa Mandarin'},
+  '小餐馆':{py:'xiǎo cānguǎn', id:'restoran kecil'},
+  '问题':{py:'wèntí', id:'pertanyaan'},
+  '这条街':{py:'zhè tiáo jiē', id:'jalan ini'},
+  '街上':{py:'jiē shàng', id:'di jalan'},
+  '六十多年':{py:'liùshí duō nián', id:'lebih dari 60 tahun'},
+  '倒杯茶':{py:'dào bēi chá', id:'menuangkan teh'},
+  '进来坐':{py:'jìnlái zuò', id:'masuk, silakan duduk'},
+  '听懂了':{py:'tīng dǒng le', id:'sudah paham'},
+  '试着说':{py:'shìzhe shuō', id:'coba katakan'},
+  '自然':{py:'zìrán', id:'alami'},
+  '现在':{py:'xiànzài', id:'sekarang'},
+  '轮到你了':{py:'lúndào nǐ le', id:'giliranmu'},
+  '再说一次':{py:'zài shuō yí cì', id:'katakan sekali lagi'},
+  '喜欢':{py:'xǐhuan', id:'suka'},
+  '今天':{py:'jīntiān', id:'hari ini'},
+  '很好':{py:'hěn hǎo', id:'bagus sekali'},
+  '不错':{py:'búcuò', id:'lumayan bagus'},
+  '可以':{py:'kěyǐ', id:'bisa, boleh'},
+  '海棠街':{py:'hǎitáng jiē', id:'Jalan Haitang'},
+  '一直在':{py:'yìzhí zài', id:'selalu ada'}
+};
+const WORD_KEYS = Object.keys(WORD_GLOSS).sort((a,b)=>b.length-a.length);
+
+/* 把中文句子切成「词 / 字」片段，用于悬停显示拼音与释义 */
+function segmentText(text){
+  const out=[]; let i=0;
+  while (i < text.length){
+    const ch = text[i];
+    if (/[\u4e00-\u9fff]/.test(ch)){
+      let hit = null;
+      for (const k of WORD_KEYS){ if (text.startsWith(k, i)){ hit = k; break; } }
+      if (hit){ const g = WORD_GLOSS[hit]; out.push({ t:hit, py:g.py, id:g.id }); i += hit.length; }
+      else { out.push({ t:ch, py:CHAR_PY[ch]||'', id:'' }); i += 1; }
+    } else {
+      let j = i;
+      while (j < text.length && !/[\u4e00-\u9fff]/.test(text[j])) j++;
+      out.push({ t:text.slice(i,j), py:'', id:'' }); i = j;
+    }
+  }
+  return out;
+}
+function tipOf(s){ return s.py ? (s.py + (s.id ? ' · ' + s.id : '')) : ''; }
+
+function now(){ const d = new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
+function cut(s,n=16){ return s.length>n ? s.slice(0,n)+'…' : s; }
+
+let toastTimer = null;
+function toast(msg, ms=2600){
+  el.toast.textContent = msg; el.toast.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>el.toast.classList.remove('on'), ms);
+}
+function announce(text){ el.live.textContent = text; }
+
+function renderReveal(node, text, step=42){
+  node.innerHTML = '';
+  segmentText(text).forEach((seg,i)=>{
+    const s = document.createElement('span');
+    const tip = tipOf(seg);
+    s.className = 'glyph' + (tip ? ' has-py' : '');
+    s.textContent = seg.t;
+    s.style.setProperty('--i', i);
+    s.style.animationDelay = (i*step)+'ms';
+    if (tip) s.setAttribute('data-tip', tip);
+    node.appendChild(s);
+  });
+}
+/* 手机端：点一下汉字也能看到拼音与释义 */
+function bindGlyphTap(root){
+  root.addEventListener('click', (e)=>{
+    if (e.target.closest('.option')) return;
+    const g = e.target.closest('.glyph.has-py');
+    if (!g) return;
+    e.stopPropagation();
+    root.querySelectorAll('.glyph.show-tip').forEach(x=>{ if (x!==g) x.classList.remove('show-tip'); });
+    g.classList.toggle('show-tip');
+  });
+}
+
+/* ============================================================
+   3. 音效：全部为 WebAudio 生成，无音频文件
+   ============================================================ */
+const Sound = {
+  ctx:null, on:false, master:null, pad:null,
+  init(){
+    if (this.ctx) return true;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    const ctx = this.ctx = new AC();
+    this.master = ctx.createGain(); this.master.gain.value = 0; this.master.connect(ctx.destination);
+    // 夜色底噪：低频垫 + 风声
+    const pad = ctx.createGain(); pad.gain.value = .13;
+    const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=520; lp.Q.value=.7;
+    pad.connect(lp).connect(this.master);
+    [110, 164.81, 220].forEach((f,idx)=>{
+      const o = ctx.createOscillator(); o.type = idx===2 ? 'triangle':'sine'; o.frequency.value=f;
+      const g = ctx.createGain(); g.gain.value = idx===2 ? .05 : .11;
+      o.connect(g).connect(pad); o.start();
+      const lfo = ctx.createOscillator(); lfo.frequency.value = .05 + idx*.017;
+      const lg = ctx.createGain(); lg.gain.value = 1.4 + idx; lfo.connect(lg).connect(o.detune); lfo.start();
+    });
+    const len = Math.floor(ctx.sampleRate*4);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0); let last = 0;
+    for (let i=0;i<len;i++){ const w = Math.random()*2-1; last = (last + .02*w)/1.02; data[i] = last*3.4; }
+    const noise = ctx.createBufferSource(); noise.buffer = buf; noise.loop = true;
+    const nf = ctx.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=360; nf.Q.value=.6;
+    const ng = ctx.createGain(); ng.gain.value=.18;
+    noise.connect(nf).connect(ng).connect(this.master); noise.start();
+    return true;
+  },
+  enable(){
+    if (!this.init()) { toast('这个浏览器不支持生成式音效'); return false; }
+    this.ctx.resume?.();
+    this.on = true;
+    this.master.gain.cancelScheduledValues(this.ctx.currentTime);
+    this.master.gain.linearRampToValueAtTime(.62, this.ctx.currentTime+2.2);
+    return true;
+  },
+  disable(){
+    if (!this.ctx) return;
+    this.on = false;
+    this.master.gain.cancelScheduledValues(this.ctx.currentTime);
+    this.master.gain.linearRampToValueAtTime(0, this.ctx.currentTime+.7);
+  },
+  tone(freq, dur=.8, vol=.05, type='sine', when=0){
+    if (!this.on) return;
+    const t = this.ctx.currentTime + when;
+    const o = this.ctx.createOscillator(); o.type = type || 'sine'; o.frequency.value=freq;
+    const g = this.ctx.createGain(); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.02);
+    g.gain.exponentialRampToValueAtTime(.0001, t+dur);
+    o.connect(g).connect(this.master); o.start(t); o.stop(t+dur+.05);
+  },
+  bell(){ this.tone(660,2.4,.05); this.tone(990,2.0,.028,null,.05); this.tone(1320,1.6,.016,null,.12); },
+  blip(who){
+    const f = { linhao:392, chen:294, zhou:349, alan:440, panda:523 }[who] || 392;
+    this.tone(f,1.5,.026,'sine'); this.tone(f*2,1.0,.012,'triangle',.04);
+  },
+  tick(){ this.tone(1180,.12,.02,'triangle'); },
+  thump(){ this.tone(92,.5,.09,'sine'); this.tone(138,.36,.04,'sine',.11); },
+  whoosh(){
+    if (!this.on) return;
+    const t = this.ctx.currentTime;
+    const bufLen = Math.floor(this.ctx.sampleRate*.9);
+    const b = this.ctx.createBuffer(1,bufLen,this.ctx.sampleRate); const d = b.getChannelData(0);
+    for (let i=0;i<bufLen;i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/bufLen, 2.2);
+    const src = this.ctx.createBufferSource(); src.buffer=b;
+    const f = this.ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(240,t); f.frequency.exponentialRampToValueAtTime(1500,t+.5); f.Q.value=.8;
+    const g = this.ctx.createGain(); g.gain.value=.24;
+    src.connect(f).connect(g).connect(this.master); src.start(t);
+  }
+};
+
+/* ============================================================
+   4. 舞台：场景、镜头、字幕、幕卡
+   ============================================================ */
+const CAM = {
+  push:      ['scale(1.05) translate(0%,0%)',   'scale(1.155) translate(-1.4%,1.2%)'],
+  pushslow:  ['scale(1.035) translate(0%,0%)',  'scale(1.1) translate(1.2%,1%)'],
+  drift:     ['scale(1.09) translate(-1.6%,0%)','scale(1.045) translate(1.6%,1.4%)'],
+  hold:      ['scale(1.055) translate(0%,0%)',  'scale(1.075) translate(.6%,.8%)'],
+  stageIn:   ['scale(1.005) translate(0%,.6%)', 'scale(1.05) translate(0%,-1%)'],
+  pull:      ['scale(1.17) translate(0%,1%)',   'scale(1.05) translate(0%,0%)']
+};
+const FOCUS_X = { linhao:'2%', chen:'1%', zhou:'0%', alan:'-1%', panda:'0%' };
+
+function setScene(scene, dur=6000){
+  const changed = scene.img && scene.img !== state.imgSrc;
+  if (changed){
+    const incomingLayer = state.cur==='A' ? el.layerB : el.layerA;
+    const incomingImg   = state.cur==='A' ? el.imgB : el.imgA;
+    const outgoingLayer = state.cur==='A' ? el.layerA : el.layerB;
+    incomingImg.src = scene.img;
+    incomingImg.style.objectPosition = scene.pos || '50% 30%';
+    if (scene.fit === 'contain'){
+      incomingLayer.classList.add('contain');
+      incomingLayer.style.backgroundImage = 'url("' + scene.img + '")';
+      incomingLayer.style.backgroundPosition = scene.pos || '50% 30%';
+    } else {
+      incomingLayer.classList.remove('contain');
+      incomingLayer.style.backgroundImage = '';
+    }
+    incomingLayer.style.transition = 'opacity 1.25s cubic-bezier(.6,.02,.2,1), transform .9s ease-out';
+    outgoingLayer.style.transition = 'opacity 1.25s cubic-bezier(.6,.02,.2,1), transform .9s ease-out';
+    incomingLayer.classList.add('on');
+    outgoingLayer.classList.remove('on');
+    state.cur = state.cur==='A' ? 'B' : 'A';
+    state.imgSrc = scene.img;
+    state.activeLayer = incomingLayer; state.activeImg = incomingImg;
+  }
+  if (scene.grade) el.grade.className = 'grade ' + scene.grade;
+  if (state.activeImg) camera(state.activeImg, scene.cam || 'hold', dur);
+  if (scene.pos && state.activeImg) state.activeImg.style.objectPosition = scene.pos;
+  el.spot.style.transform = 'translate3d(' + (FOCUS_X[scene.focus]||'0') + ',0,0)';
+}
+function camera(img, name, dur){
+  const p = CAM[name] || CAM.hold;
+  img.style.transition = 'none';
+  img.style.transform = p[0];
+  void img.offsetWidth;
+  img.style.transition = 'transform ' + Math.max(1200,dur) + 'ms linear';
+  img.style.transform = p[1];
+}
+function hideSubs(){ state.lineSeq++; el.subs.classList.remove('on','reveal'); }
+function hideNarration(){ state.lineSeq++; el.narration.classList.remove('on'); }
+
+function showLine(b, opts={}){
+  hideNarration();
+  const c = CAST[b.who] || CAST.panda;
+  el.subs.style.setProperty('--who', c.color);
+  const token = ++state.lineSeq;
+  const paint = ()=>{
+    if (token !== state.lineSeq) return;
+    el.subsWho.querySelector('b').textContent = c.zh;
+    el.subsWhoEn.textContent = c.en;
+    renderReveal(el.subsZh, b.zh, opts.slow ? 110 : 42);
+    el.subsPy.textContent = b.py || '';
+    el.subsEn.textContent = b.en || '';
+    el.subsId.textContent = b.id || '';
+    el.subs.classList.add('on');
+    el.subs.classList.remove('reveal');
+    setTimeout(()=>{ if (token === state.lineSeq) el.subs.classList.add('reveal'); }, 260);
+  };
+  if (ZERO()){
+    // 音频先行：零基础档先让「声音」走 0.7 秒，再上字幕
+    el.subs.classList.remove('on','reveal');
+    el.subsZh.innerHTML = ''; el.subsPy.textContent = ''; el.subsEn.textContent = ''; el.subsId.textContent = '';
+    setTimeout(paint, 720);
+  } else {
+    paint();
+  }
+  Sound.blip(b.who);
+  const d = b.d || '';
+  logEvent('演员', `${c.zh} 说出一句台词`, (d? d+' · ':'') + cut(b.zh, 20), c.color);
+  announce(c.zh + '：' + b.zh);
+  state.lastLine = b;
+}
+function showNarration(b){
+  hideSubs();
+  el.narrPy.textContent = pinyinize(b.zh || '');
+  const token = ++state.lineSeq;
+  const paint = ()=>{
+    if (token !== state.lineSeq) return;
+    renderReveal(el.narrZh, b.zh, 54);
+    el.narrZh.classList.add('reveal-txt');
+    el.narrEn.textContent = b.en || '';
+    el.narrId.textContent = b.id || '';
+    el.narration.classList.add('on');
+  };
+  if (ZERO()){
+    el.narration.classList.remove('on');
+    el.narrZh.innerHTML = '';
+    setTimeout(paint, 700);
+  } else {
+    paint();
+  }
+  announce(b.zh);
+  state.lastLine = b;
+  logEvent('旁白', '叙述推进', cut(b.zh, 20), 'rgba(247,240,228,.5)');
+}
+function showActCard(ch, b){
+  hideSubs(); hideNarration();
+  const parts = (ch.title.vertical || '').split('·');
+  el.actCardVerticalPy.textContent = pinyinize(ch.title.vertical || '');
+  el.actCardVertical.innerHTML = `<span class="num">${parts[0]||''}</span><span>·</span><span>${parts.slice(1).join('·')||''}</span>`;
+  el.actCardEn.textContent = ch.title.en || '';
+  el.actCardSub.textContent = ch.title.sub || '';
+  el.actCardSubId.textContent = ch.title.idSub || '';
+  el.actCard.classList.add('on');
+  el.spot.classList.add('dim');
+  document.body.classList.add('cinema-tight');
+  Sound.whoosh(); setTimeout(()=>Sound.bell(), 420);
+  setTimeout(()=>{ el.actCard.classList.remove('on'); document.body.classList.remove('cinema-tight'); el.spot.classList.remove('dim'); }, Math.max(1200,(b.dur||2800)) - 400);
+}
+
+/* ============================================================
+   5. 导演解说面板
+   ============================================================ */
+function logEvent(agent, title, copy, color){
+  state.log.unshift({ agent, title, copy, time:now(), color: color || 'var(--amber)' });
+  if (state.log.length > 40) state.log.pop();
+  renderLog();
+}
+function renderLog(){
+  el.dLog.innerHTML = state.log.slice(0,14).map(e=>`
+    <div class="log-item" style="--c:${e.color}">
+      <div class="l-top"><span class="l-agent">${e.agent}</span><span class="l-time">${e.time}</span></div>
+      <b>${e.title}</b>${e.copy?`<p>${e.copy}</p>`:''}
+    </div>`).join('');
+}
+function renderIntent(ch){
+  const it = ch.intent;
+  el.dIntent.innerHTML = `
+    <div class="d-row"><span class="k">目标</span><span class="v">${it.goal}</span></div>
+    <div class="d-row"><span class="k">能力</span><span class="v">${it.competency}</span></div>
+    <div class="d-row"><span class="k">证据</span><span class="v">${it.evidence}</span></div>
+    <div class="d-row"><span class="k">支持</span><span class="v">${it.policy}</span></div>`;
+}
+function renderDecision(ch){
+  const d = ch.decision;
+  el.dDecision.innerHTML = `
+    <div class="d-row"><span class="k">mode</span><span class="v"><code>${d.mode}</code></span></div>
+    <div class="d-row"><span class="k">cast</span><span class="v">${d.cast}</span></div>
+    <div class="d-row"><span class="k">media</span><span class="v"><code>${d.media}</code></span></div>
+    <div class="d-row"><span class="k">fallback</span><span class="v"><code>${d.fallback}</code></span></div>
+    <div class="d-row"><span class="k">对照</span><span class="v">${CLASSIC_MAP[ch.id] || '—'}</span></div>
+    <div class="d-row"><span class="k">字幕档</span><span class="v">${state.textPreset === 'zero' ? '零基础（全拼音 · 去汉字）' : state.textPreset === 'default' ? '默认（汉字 + 拼音）' : '自定义'}</span></div>`;
+}
+function renderEvidence(){
+  const key = state.evidence.filter(e=>e.kind!=='contact');
+  if (!key.length){
+    el.dEvidence.innerHTML = '<div class="ev-empty">还没有证据。角色说台词只会形成「接触」，不记为掌握。</div>';
+    return;
+  }
+  el.dEvidence.innerHTML = key.map(e=>`
+    <div class="ev-card">
+      <div class="ev-top"><b>${e.competency}</b><span class="chip ${SUPPORT_CLASS[e.support]}">${SUPPORT_LABEL[e.support]}</span></div>
+      <p>${e.context}${e.note?' · '+e.note:''}<br>${e.modality==='listening'?'听力':'口语'} · ${e.success==='success'?'成功':'部分成功'} · ${e.time}</p>
+    </div>`).join('');
+}
+function renderRail(){
+  el.actRail.innerHTML = CHAPTERS.map((ch,i)=>{
+    const cls = [ i===state.chapter?'active':'', state.visited.has(i)?'done':'' ].join(' ');
+    return `<button class="${cls}" data-chapter="${i}"><span class="tick"></span><span class="zh-mini bizh">${ch.rail}</span><span class="zh-mini id-mini biid">${ch.railId||ch.rail}</span></button>`;
+  }).join('');
+  el.actRail.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>jumpChapter(Number(btn.dataset.chapter)));
+  });
+}
+function openDirector(on){
+  const show = on===undefined ? !el.director.classList.contains('on') : on;
+  el.director.classList.toggle('on', show);
+  el.btnDirector.setAttribute('aria-pressed', show);
+  if (show) logEvent('评注', '打开导演解说', '评审模式：查看本幕的教学意图、导演决定与证据记录。', 'rgba(240,180,100,.8)');
+}
+
+/* ============================================================
+   6. 节拍引擎
+   ============================================================ */
+function updateProgress(){
+  const ch = CHAPTERS[state.chapter];
+  const per = 1 / CHAPTERS.length;
+  const inner = state.beats ? (state.i / Math.max(1,state.beats.length)) : 0;
+  el.progressBar.style.width = clamp((state.chapter*per + inner*per)*100, 0, 100).toFixed(2) + '%';
+}
+function schedule(dur){
+  clearTimeout(state.timer);
+  state.dur = dur; state.t0 = performance.now();
+  if (state.playing) state.timer = setTimeout(nextBeat, dur);
+}
+function nextBeat(){ if (!state.started) return; state.i++; playBeat(); }
+function playBeat(){
+  const ch = CHAPTERS[state.chapter];
+  const b = state.beats[state.i];
+  if (!b){ endChapter(); return; }
+  updateProgress();
+  const wide = ch.sceneWide;
+  const sc = b.scene || ((b.t === 'title' || b.t === 'narration') && wide ? wide : ch.scene);
+  if (sc) setScene(sc, b.dur || 5000);
+  switch (b.t){
+    case 'title':
+      showActCard(ch, b); schedule(b.dur || 2800); break;
+    case 'narration':
+      showNarration(b); schedule(b.dur || 4200); break;
+    case 'line':
+      showLine(b); schedule(b.dur || 4000); break;
+    case 'circle':
+      circleBeat(b); break;
+    case 'model':
+      teacherModel(b); break;
+    case 'listen':
+      userListen(b); break;
+    case 'speak':
+      userSpeak(b); break;
+    case 'choice':
+      userChoice(b); break;
+    default:
+      nextBeat();
+  }
+}
+function startChapter(index, opts={}){
+  clearTimeout(state.timer);
+  state.chapter = clamp(index, 0, CHAPTERS.length-1);
+  state.visited.add(state.chapter);
+  const ch = CHAPTERS[state.chapter];
+  state.beats = ch.beats.map(b=>({...b}));
+  state.i = 0;
+  state.support = null; state.userBeat = null;
+  hideApron(); hideSubs(); hideNarration(); el.actCard.classList.remove('on'); clearCircle();
+  renderIntent(ch); renderDecision(ch); renderRail();
+  maybeInviteHanzi();
+  setScene(ch.sceneWide || ch.scene, 9000);
+  logEvent('导演', `${ch.nav} · 开始`, `按蓝图第 4.3 节决策矩阵：${ch.decision.mode}`, 'var(--amber)');
+  if (!opts.silent) Sound.bell();
+  playBeat();
+}
+function chapterTransition(index){
+  el.veil.style.setProperty('--vx','50%'); el.veil.style.setProperty('--vy','40%');
+  el.veil.classList.add('on'); Sound.whoosh();
+  setTimeout(()=>{ startChapter(index); setTimeout(()=>el.veil.classList.remove('on'), 140); }, 460);
+}
+function endChapter(){
+  if (state.chapter >= CHAPTERS.length-1){ openCurtainCall(); return; }
+  chapterTransition(state.chapter+1);
+}
+function jumpChapter(i){
+  if (i === state.chapter) { toast('已经在' + CHAPTERS[i].nav); return; }
+  state.playing = true; syncPlayButton();
+  chapterTransition(i);
+  toast('跳到' + CHAPTERS[i].nav + '（评审用）');
+}
+function replayChapter(){ startChapter(state.chapter, {silent:false}); toast('重播' + CHAPTERS[state.chapter].nav); }
+function togglePlay(){
+  state.playing = !state.playing;
+  syncPlayButton();
+  if (!state.playing){
+    if (state.timer){ clearTimeout(state.timer); state.timer = null;
+      state.remain = Math.max(500, state.dur - (performance.now()-state.t0)); }
+    toast('已暂停 · 空格继续'); wakeChrome(true);
+  } else {
+    toast('继续');
+    if (!state.userBeat) schedule(state.remain || 2000);
+    else playBeat();
+  }
+}
+function syncPlayButton(){
+  el.btnPlay.setAttribute('aria-pressed', !state.playing);
+  el.iconPlay.innerHTML = state.playing
+    ? '<path d="M7 5v14M17 5v14"/>'
+    : '<path d="M7 4.5 19 12 7 19.5Z"/>';
+}
+
+/* ============================================================
+   7. 舞台前区（用户回合）
+   ============================================================ */
+function syncApronOffset(){
+  requestAnimationFrame(()=>{
+    const on = el.apron.classList.contains('on');
+    const h = on ? el.apron.getBoundingClientRect().height : 0;
+    document.documentElement.style.setProperty('--apron-h', (h ? Math.round(h) + 42 : 0) + 'px');
+  });
+}
+function showApron(){ el.apron.classList.add('on'); document.body.classList.add('turn'); syncApronOffset(); }
+function hideApron(){ el.apron.classList.remove('on'); document.body.classList.remove('turn'); clearTimeout(state.autoTimer); syncApronOffset(); }
+function resetApron(){
+  el.apronTarget.className = 'apron-target'; el.apronTarget.innerHTML = '';
+  el.apronFeedback.className = 'apron-feedback';
+  el.optionRow.hidden = true; el.optionRow.innerHTML = '';
+  el.apronTools.innerHTML = '';
+  el.micBtn.style.display = ''; el.micBtn.classList.remove('rec');
+  el.micLabel.innerHTML = bi('按住说话 · Hold to speak', 'Tekan & tahan untuk bicara');
+}
+function tool(label, small, onClick, used){
+  const b = document.createElement('button');
+  b.className = 'tool' + (used?' used':'');
+  b.innerHTML = label + (small?` <span style="opacity:.5;font-size:10px">${small}</span>`:'');
+  if (onClick) b.addEventListener('click', ()=>{ Sound.tick(); onClick(b); });
+  el.apronTools.appendChild(b);
+  syncApronOffset();
+  return b;
+}
+const bi = (zh, id) => `<span class="bizh">${zh}</span><span class="biid">${id || zh}</span>`;
+const IDON = () => !document.body.classList.contains('no-indo');
+function toastBi(zh, id, ms){ toast(IDON() && id ? id : zh, ms); }
+function setHint(zh, id){ el.apronHint.innerHTML = `<span>${zh}</span>` + (id ? `<span class="idtx">${id}</span>` : ''); }
+function chip(text, cls, textId){ return `<span class="chip ${cls||''}">${bi(text, textId)}</span>`; }
+function makeOption(o, onClick){
+  const btn = document.createElement('button');
+  btn.className = 'option';
+  const b = document.createElement('b');
+  renderReveal(b, o.zh, 40);
+  btn.appendChild(b);
+  const sub = [o.py, o.en].filter(Boolean).join(' · ');
+  if (sub){ const sp = document.createElement('span'); sp.textContent = sub; btn.appendChild(sp); }
+  if (o.id){ const ie = document.createElement('span'); ie.className = 'idtx'; ie.textContent = o.id; btn.appendChild(ie); }
+  btn.addEventListener('click', ()=>{ Sound.tick(); onClick(btn); });
+  return btn;
+}
+function feedback(ok, title, copy, chips, copyId, titleId){
+  el.fbIcon.textContent = ok ? '✓' : '↻';
+  el.fbIcon.style.background = ok ? 'rgba(132,195,171,.18)' : 'rgba(240,180,100,.18)';
+  el.fbIcon.style.color = ok ? 'var(--jade)' : 'var(--amber)';
+  el.fbTitle.innerHTML = bi(title, titleId || title);
+  el.fbCopy.innerHTML = (copy || '') + (copyId ? `<span class="idtx fb-id">${copyId}</span>` : '');
+  el.fbChips.innerHTML = (chips||[]).join('');
+  el.apronFeedback.classList.add('on');
+  syncApronOffset();
+}
+function revealTarget(b){
+  el.apronTarget.className = 'apron-target on';
+  el.apronTarget.innerHTML = `<span class="reveal-txt">${b.target}</span><small>${b.targetPy||''}${b.targetEn?' · '+b.targetEn:''}</small>`
+    + (b.idTarget ? `<span class="idtx">${b.idTarget}</span>` : '');
+  const holder = el.apronTarget.querySelector('.reveal-txt');
+  if (holder) renderReveal(holder, b.target, 40);
+}
+function commitEvidence(e){
+  const entry = {
+    competency:e.competency, modality:e.modality||'speaking', context:e.context||'',
+    support:e.support||'independent', kind:e.kind||'performance', success:e.success||'success',
+    note:e.note||'', time:now()
+  };
+  state.evidence.push(entry); renderEvidence();
+  logEvent('评估', 'evidence.commit · 写入证据', `${entry.competency} · ${SUPPORT_LABEL[entry.support]}`, 'var(--jade)');
+  announce('已记录：' + entry.competency + '，' + SUPPORT_LABEL[entry.support]);
+}
+function finishUserTurn(label, autoMs){
+  tool(label || '继续 →', '', ()=>advanceFromUser());
+  clearTimeout(state.autoTimer);
+  state.autoTimer = setTimeout(()=>advanceFromUser(), autoMs || 3600);
+}
+function advanceFromUser(){
+  clearTimeout(state.autoTimer);
+  const pending = state.pendingResult;
+  state.pendingResult = null;
+  state.userBeat = null; state.support = null;
+  hideApron(); el.spot.classList.remove('dim');
+  if (pending && pending.length){
+    state.beats.splice(state.i+1, 0, ...pending.map(x=>({...x})));
+  }
+  nextBeat();
+}
+
+/* --- TPRS 追问（戏里的确认问句：陈述 → 是/否 → A/B → 谁） --- */
+function hideCircleBar(){
+  el.circleBar.classList.remove('on');
+  document.body.classList.remove('circling');
+}
+function clearCircle(){
+  clearTimeout(state.circleTimer);
+  hideCircleBar();
+  el.circleOptions.innerHTML = '';
+}
+function circleBeat(b){
+  state.userBeat = b; state.support = null; state.circleTry = 0;
+  el.spot.classList.remove('dim');
+  hideApron();
+  askCircle(b, false);
+  Sound.thump();
+  logEvent('导演', 'TPRS 追问 · 第 ' + (b.step || 1) + ' 组',
+    '围绕目标句「' + (b.target || b.zh) + '」做确认式追问：先听懂，再回答，不要求开口。', 'var(--amber)');
+}
+function askCircle(b, slow){
+  showLine({ who:b.who, zh:b.zh, py:b.py, en:b.en, id:b.id }, { slow:slow });
+  hideCircleBar();
+  document.body.classList.add('circling');
+  el.circleOptions.innerHTML = '';
+  b.options.forEach(o=>{
+    const btn = document.createElement('button');
+    btn.className = 'cb-opt';
+    const sub = [o.py, o.en].filter(Boolean).join(' · ');
+    btn.innerHTML = `<b>${o.zh}</b>` + (sub ? `<span>${sub}</span>` : '') + (o.id ? `<span class="idtx">${o.id}</span>` : '');
+    btn.addEventListener('click', ()=>answerCircle(b, o, btn));
+    el.circleOptions.appendChild(btn);
+  });
+  // 音频先行：零基础档等问题字幕上屏后再出选项（约 0.72s 字幕 + 0.45s 阅读）
+  const revealDelay = ZERO() ? 1180 : 60;
+  state.circleTimer = setTimeout(()=>el.circleBar.classList.add('on'), revealDelay);
+}
+function answerCircle(b, o, btn){
+  const myChapter = state.chapter, myI = state.i;
+  const fresh = ()=> state.chapter === myChapter && state.i === myI;
+  if (o.ok){
+    el.circleOptions.querySelectorAll('.cb-opt').forEach(x=>x.disabled = true);
+    btn.classList.add('correct');
+    const support = state.support || 'independent';
+    commitEvidence({ competency:b.competency, modality:'listening',
+      context:'林浩 · 楼道（TPRS 追问）', support, note:'第 ' + (b.step || 1) + ' 组追问 · ' + (b.kind || '') });
+    state.userBeat = null;
+    if (b.ok){
+      state.circleTimer = setTimeout(()=>{
+        if (!fresh()) return;
+        hideCircleBar();
+        showLine({ who:b.who, zh:b.ok.zh, py:b.ok.py, en:b.ok.en, id:b.ok.id });
+      }, 560);
+    } else {
+      hideCircleBar();
+    }
+    schedule(2600);
+  } else {
+    state.support = 'slower'; state.circleTry++;
+    btn.classList.add('wrong'); btn.disabled = true;
+    Sound.tick();
+    logEvent('老师', '追问答错 · 放慢重说', '不失败：角色把同一句放慢再说一次，支持级别记「放慢后完成」。', 'var(--panda)');
+    if (state.circleTry === 1){
+      if (b.no) showLine({ who:b.who, zh:b.no.zh, py:b.no.py, en:b.no.en, id:b.no.id }, { slow:true });
+      state.circleTimer = setTimeout(()=>{ if (fresh()) askCircle(b, true); }, 2300);
+    } else {
+      const right = b.options.find(x=>x.ok);
+      el.circleOptions.querySelectorAll('.cb-opt').forEach(x=>{
+        x.disabled = true;
+        if (right && x.querySelector('b').textContent === right.zh) x.classList.add('correct');
+      });
+      commitEvidence({ competency:b.competency, modality:'listening',
+        context:'林浩 · 楼道（TPRS 追问）', support:'slower', success:'partial',
+        note:'两轮追问后给出正确答案 · ' + (b.kind || '') });
+      state.userBeat = null;
+      hideCircleBar();
+      if (b.ok) showLine({ who:b.who, zh:b.ok.zh, py:b.ok.py, en:b.ok.en, id:b.ok.id });
+      schedule(2800);
+    }
+  }
+}
+
+/* --- 汉字层邀请（正式版：第 4 集自动邀请） --- */
+const HANZI_INVITE_EPISODE = 4;
+function maybeInviteHanzi(){
+  if (!ZERO() || LS.get('ht.hanziInvited') === '1') return;
+  if ((state.episodeCount || 0) >= HANZI_INVITE_EPISODE){
+    LS.set('ht.hanziInvited', '1');
+    toast('你已经能听懂一会儿中文了——把汉字打开看看？右上角「字」，或按 H', 5200);
+    logEvent('老师', '自动邀请汉字层', '第 ' + state.episodeCount + ' 集结束：按计划邀请升级到「汉字 + 拼音」，可随时关掉。', 'var(--panda)');
+  }
+}
+function showHanziInvite(){
+  if (!ZERO()){ el.ccInvite.hidden = true; return; }
+  el.ccInvite.hidden = false;
+  $('ccInviteCopy').textContent = state.episodeCount >= HANZI_INVITE_EPISODE
+    ? '这一集你已经听懂了很多中文。把汉字也打开吧——它会和拼音一起出现，随时可以关。'
+    : '你已经听懂了好几句中文。正式版会在第 4 集自动邀请开汉字；现在也可以先试试。';
+}
+
+/* --- 理解检查 --- */
+function userListen(b){
+  state.userBeat = b; state.support = null; state.listening = false;
+  el.spot.classList.add('dim');
+  resetApron(); el.micBtn.style.display = 'none';
+  setHint(b.prompt, b.idPrompt);
+  el.optionRow.hidden = false;
+  b.options.forEach((o,i)=>{
+    const btn = makeOption(o, (el2)=>answerListen(b,o,el2));
+    btn.dataset.i = i;
+    el.optionRow.appendChild(btn);
+  });
+  showApron(); Sound.thump();
+  logEvent('导演', '切到「先理解」', '本幕不要求开口：先确认听懂了什么，再决定是否表达。', 'var(--amber)');
+}
+function answerListen(b, opt, btn){
+  if (opt.ok){
+    btn.classList.add('correct');
+    el.optionRow.querySelectorAll('.option').forEach(x=>{ x.disabled = true; });
+    const support = state.support || 'independent';
+    feedback(true, '听懂了：' + (opt.zh), b.okCopy,
+      [chip('听力 · 成功','ind','Menyimak · berhasil'), chip(SUPPORT_LABEL[support], SUPPORT_CLASS[support], SUPPORT_LABEL_ID[support])],
+      b.okCopyId, 'Paham: ' + (opt.id || opt.zh));
+    commitEvidence({ competency:b.competency, modality:'listening', context:'林浩 · 楼道', support, note:'三选一理解检查' });
+    finishUserTurn('听林浩接着说 →', 4200);
+  } else {
+    state.support = 'slower';
+    btn.disabled = true; btn.classList.add('wrong');
+    feedback(false, '差一点', b.noCopy, [chip('老师将重说一遍', 'sup', 'Guru akan mengulang pelan')],
+      b.noCopyId, 'Hampir benar');
+    const line = b.prevLine || state.lastLine;
+    setTimeout(()=>{ if (line) showLine(line, {slow:true}); el.spot.classList.remove('dim'); }, 700);
+    el.optionRow.querySelectorAll('.option').forEach(x=>{ if (!x.disabled) x.disabled = false; });
+    logEvent('老师', '放慢重说（支持第 2 级）', '不重复追问，只把同一句放慢一遍。', 'var(--panda)');
+  }
+}
+
+/* --- 开口练习 --- */
+function userSpeak(b){
+  state.userBeat = b; state.support = b.mode==='repeat' ? 'model' : null;
+  el.spot.classList.add('dim');
+  resetApron();
+  setHint(b.prompt, b.idPrompt);
+  showApron(); Sound.thump();
+  tool(bi('听老师说','Guru memberi contoh'), bi('Model','Contoh'), ()=>{
+    if (b.model) { showLine(b.model); }
+    else if (state.lastLine) { showLine(state.lastLine, {slow:true}); }
+    state.support = state.support || 'model';
+    logEvent('老师', '给一次示范（支持第 6 级）', '示范一个完整句，然后把回合交还给学生。', 'var(--panda)');
+    toastBi('老师示范了一遍 · 你已经听了第二次', 'Guru memberi contoh — ini kali kedua kamu mendengar');
+  });
+  tool(bi('给我一个关键词','Beri satu kata kunci'), bi('Key word','Kata kunci'), ()=>{
+    el.apronTarget.className = 'apron-target on';
+    el.apronTarget.innerHTML = `<span class="reveal-txt">${b.keywords||'＿＿'}</span><small>先说出这句，再补上你的信息${b.idKeywords?'<span class="idtx">'+b.idKeywords+'</span>':''}</small>`;
+    const holder = el.apronTarget.querySelector('.reveal-txt');
+    if (holder) renderReveal(holder, b.keywords || '', 46);
+    if (!state.support || state.support==='independent') state.support = 'keyword';
+    logEvent('老师', '只给一个关键词（支持第 4 级）', '不给完整句，保留学生自己造句的空间。', 'var(--panda)');
+  });
+  tool(bi('用选项回答','Jawab dengan pilihan'), bi('Options','Pilihan'), ()=>{
+    el.optionRow.hidden = false; el.optionRow.innerHTML = '';
+    (b.options || []).forEach(o=>{
+      el.optionRow.appendChild(makeOption(o, ()=>{
+        state.support = o.level || 'model';
+        evaluateSpeak(o.zh, false);
+      }));
+    });
+    toastBi('选一句你觉得最接近的，也可以随时改用麦克风', 'Pilih kalimat yang paling mendekati — kamu juga bisa pakai mikrofon kapan saja');
+  });
+  tool(bi('今天先只听','Hari ini hanya menonton'), bi('Watch only','Hanya nonton'), ()=>{
+    feedback(true, '可以，只看也是合法的', '这一轮不会记为掌握。故事会继续，人物照样记得你。',
+      [chip('接触证据 · 不计掌握','watch','Paparan saja · bukan penguasaan')],
+      'Babak ini tidak dicatat sebagai penguasaan. Cerita tetap lanjut, dan tokoh tetap mengingatmu.', 'Boleh, hanya menonton juga sah');
+    commitEvidence({ competency:b.competency, modality:'speaking', context:'林浩 · 门口', support:'watched',
+      kind:'contact', success:'not_yet', note:'用户选择只看模式' });
+    logEvent('老师', '切换到只看模式', '尊重学生状态：不强制参与，不羞辱式提醒。', 'var(--panda)');
+    finishUserTurn(bi('继续看故事 →','Lanjut menonton →'), 3200);
+  });
+  logEvent('导演', '进入用户回合', b.mode==='repeat' ? '复述任务：示范级别支持。' : '目标为主动表达，等待学生先开口。', 'var(--amber)');
+}
+function startRec(){
+  const b = state.userBeat;
+  if (!b || b.t !== 'speak' || state.listening) return;
+  state.listening = true;
+  el.micBtn.classList.add('rec');
+  el.micLabel.innerHTML = bi('正在听…松开结束','Mendengarkan… lepaskan untuk selesai');
+  Sound.thump();
+  state.recTimer = setTimeout(()=>stopRec(true), 6000);
+  logEvent('评估', '开始收音', '原型模拟：真实版本在这里调用 ASR，低置信度不判错。', 'var(--jade)');
+}
+function stopRec(auto){
+  if (!state.listening) return;
+  state.listening = false; clearTimeout(state.recTimer); state.lastRecEnd = performance.now();
+  el.micBtn.classList.remove('rec');
+  el.micLabel.innerHTML = bi('识别中…','Memproses…');
+  setTimeout(()=>evaluateSpeak(null, auto), 900);
+}
+function evaluateSpeak(optionText, autoStop){
+  const b = state.userBeat; if (!b) return;
+  const support = state.support || 'independent';
+  const said = optionText || (b.target + '');
+  const heard = b.id==='name' ? 'wǒ jiào Emma'
+             : b.id==='repeat' ? 'wǒ jiào Emma, wǒ cóng London lái'
+             : b.id==='retry' ? 'wǒ cóng London lái' : said;
+  const copy =
+    support==='independent' ? '完整句子，自己说出来的一次。这一条会作为独立证据保存。'
+    : support==='model' ? '跟着老师的示范复述了一遍——这是「示范支持下的表现」，不是抄写，也值得记录。'
+    : support==='keyword' ? '借助关键词说出了完整的句子。下一次会先撤掉关键词。'
+    : '听过、试过、被帮助过。系统会记住你需要哪一级支持。';
+  const copyId =
+    support==='independent' ? 'Kalimat lengkap, kamu ucapkan sendiri. Ini dicatat sebagai bukti mandiri.'
+    : support==='model' ? 'Kamu mengulang setelah contoh guru — ini penampilan dengan bantuan contoh, tetap dicatat.'
+    : support==='keyword' ? 'Kamu mengucapkan kalimat lengkap dengan bantuan kata kunci. Nanti kata kunci dilepas.'
+    : 'Kamu mendengar, mencoba, dan dibantu. Sistem mencatat tingkat bantuan yang kamu butuhkan.';
+  el.micLabel.innerHTML = bi('按住说话 · Hold to speak','Tekan & tahan untuk bicara');
+  el.micBtn.style.display = 'none';
+  el.apronTools.querySelectorAll('.tool').forEach(t=>t.classList.add('used'));
+  const secs = (1.1 + Math.random()*1.4).toFixed(1);
+  feedback(true, '识别到：' + heard, copy,
+    [chip('口语 · 成功','ind','Berbicara · berhasil'), chip(SUPPORT_LABEL[support], SUPPORT_CLASS[support], SUPPORT_LABEL_ID[support]),
+     chip(autoStop ? '自动停止（6 秒上限）' : '按住时长 ' + secs + ' 秒', 'watch',
+          autoStop ? 'Berhenti otomatis (maks 6 detik)' : 'Durasi tekan ' + secs + ' detik')],
+    copyId, 'Terdengar: ' + heard);
+  commitEvidence({
+    competency:b.competency, modality:'speaking',
+    context: b.id==='retry' ? '陈叔 · 小广场（第二次尝试）' : b.mode==='repeat' ? '熊猫老师 · 幕间复述' : '林浩 · 门口',
+    support, note: b.mode==='repeat' ? '示范后的复述' : '自由表达'
+  });
+  state.pendingResult = b.result || null;
+  finishUserTurn(b.mode==='repeat' ? bi('进入第三幕 →','Masuk Babak 3 →') : bi('听林浩怎么回答 →','Lihat jawaban Lin Hao →'), 4400);
+  logEvent('演员', '准备回应', '学生说完之后，先让故事产生结果，再谈对错。', 'var(--lh)');
+}
+
+/* --- 迁移选择 --- */
+function userChoice(b){
+  state.userBeat = b; state.support = null;
+  el.spot.classList.add('dim');
+  resetApron(); el.micBtn.style.display = 'none';
+  setHint(b.prompt, b.idPrompt);
+  el.optionRow.hidden = false;
+  b.options.forEach(o=>{
+    el.optionRow.appendChild(makeOption(o, (el2)=>pickChoice(b,o,el2)));
+  });
+  showApron(); Sound.thump();
+  logEvent('导演', '迁移时刻', '换人物、换地点、换问法，能力目标保持不变。', 'var(--amber)');
+}
+function pickChoice(b, o, btn){
+  el.optionRow.querySelectorAll('.option').forEach(x=>x.disabled = true);
+  btn.classList.add('picked');
+  const support = o.level || 'independent';
+  const copy = support==='independent'
+    ? '在没有提示的情况下，把完整句子用在了新的人和新场景里——这是今天最有价值的一条证据。'
+    : support==='keyword'
+    ? '意思传达到了，但句子掉了一个部分。系统记录为「借助关键词」，下一次会再验证。'
+    : '先用英语说了。老师会接住，再给你一次说中文的机会——这不是失败，是正常的路径。';
+  const copyId = support==='independent'
+    ? 'Tanpa petunjuk, kamu memakai kalimat lengkap itu pada orang dan situasi baru — bukti paling berharga hari ini.'
+    : support==='keyword'
+    ? 'Maksudmu tersampaikan, tapi kalimatnya belum lengkap. Dicatat dengan kata kunci, nanti diverifikasi lagi.'
+    : 'Kamu menjawab dengan bahasa Inggris dulu. Guru membantumu, lalu kamu dapat kesempatan sekali lagi — jalur yang wajar.';
+  feedback(true, '你这样回答：' + cut(o.zh, 22), copy,
+    [chip('迁移 · ' + (support==='independent'?'独立':'支持'), support==='independent'?'ind':'sup',
+          'Transfer · ' + (support==='independent'?'mandiri':'dengan bantuan')),
+     chip(SUPPORT_LABEL[support], SUPPORT_CLASS[support], SUPPORT_LABEL_ID[support])],
+    copyId, 'Jawabanmu: ' + cut(o.id || o.zh, 26));
+  commitEvidence({ competency:b.competency, modality:'speaking', context:'陈叔 · 小广场（新人物 / 新问法）',
+    support, note:'首次迁移尝试' });
+  state.pendingResult = o.result;
+  finishUserTurn(bi('看陈叔怎么回答 →','Lihat jawaban Chen Shu →'), 3800);
+}
+
+/* --- 老师示范节拍 --- */
+function teacherModel(b){
+  state.userBeat = b;
+  el.spot.classList.remove('dim');
+  resetApron(); el.micBtn.style.display = 'none';
+  setHint('老师示范：先听一遍，注意语序', 'Contoh dari guru: dengarkan dulu, perhatikan urutannya');
+  el.apronTarget.className = 'apron-target on';
+  el.apronTarget.innerHTML = `<span class="reveal-txt">${b.zh}</span><small>${b.py}<br>${b.en}</small>`
+    + (b.id ? `<span class="idtx">${b.id}</span>` : '');
+  const holder = el.apronTarget.querySelector('.reveal-txt');
+  if (holder) renderReveal(holder, b.zh, 46);
+  showApron();
+  el.apronFeedback.className = 'apron-feedback on';
+  el.fbIcon.textContent = '❞'; el.fbIcon.style.background = 'rgba(169,156,245,.18)'; el.fbIcon.style.color = 'var(--panda)';
+  el.fbTitle.innerHTML = bi('把名字和来处放进去','Masukkan nama dan asalmu');
+  el.fbCopy.innerHTML = b.note + (b.idNote ? `<span class="idtx fb-id">${b.idNote}</span>` : '');
+  el.fbChips.innerHTML = (b.chunks||[]).map(c=>chip(c.zh + ' · ' + c.note, 'sup', c.zh + ' · ' + (c.id||c.note))).join('');
+  tool(bi('听老师读一遍','Dengar guru membacanya'), bi('Play','Putar'), (btn)=>{
+    btn.classList.add('used');
+    el.micBtn.style.display = ''; el.micBtn.classList.remove('rec');
+    el.micLabel.textContent = '老师正在读…';
+    Sound.blip('panda');
+    setTimeout(()=>{ el.micBtn.style.display='none'; }, 2600);
+    toastBi('这就是真人会说的自然语序', 'Beginilah urutan alami yang dipakai orang asli');
+  });
+  tool(bi('记住了，继续 →','Sudah, lanjut →'), '', ()=>advanceFromUser());
+  Sound.thump();
+  logEvent('老师', '示范一个完整句', '支持阶梯最后一级：示范 → 复述 → 撤掉示范。', 'var(--panda)');
+  state.autoTimer = setTimeout(()=>advanceFromUser(), 7600);
+}
+
+/* ============================================================
+   8. 谢幕 · 今日回顾
+   ============================================================ */
+function pickEvidence(){
+  const ev = state.evidence;
+  const listen = ev.find(e=>e.modality==='listening');
+  const speak  = ev.find(e=>e.modality==='speaking' && e.context.indexOf('小广场')<0);
+  const transfer = [...ev].reverse().find(e=>e.context.indexOf('小广场')>=0);
+  return { listen, speak, transfer };
+}
+function openCurtainCall(){
+  state.started = false; state.playing = false; syncPlayButton();
+  clearTimeout(state.timer); state.timer = null;
+  hideApron(); hideSubs(); hideNarration(); el.actCard.classList.remove('on');
+  document.body.classList.remove('cinema-tight','idle'); el.chrome.classList.remove('is-dim');
+  setScene({ img:'assets/第四幕.png', grade:'market', pos:'50% 46%', cam:'drift' }, 12000);
+  renderCurtain(); el.curtainCall.classList.add('on');
+  state.episodeCount = (parseInt(LS.get('ht.episodes', '0'), 10) || 0) + 1;
+  LS.set('ht.episodes', String(state.episodeCount));
+  /* 回报给教学端：课后实践完成 */
+  LS.set('cc.stageDone', '1');
+  showHanziInvite();
+  Sound.bell();
+  logEvent('编排器', 'session.end · 生成复盘', '证据摘要、值得带走的一句话与 1/3/7 天复习已生成。', 'var(--amber)');
+}
+function evRow(idx, label, labelId, sentence, sentenceId, ev, missing, missingId){
+  const st = ev ? `<span class="chip ${SUPPORT_CLASS[ev.support]}">${bi(SUPPORT_LABEL[ev.support], SUPPORT_LABEL_ID[ev.support])}</span>`
+                : `<span class="chip watch">${bi('本轮未记录','Tidak dicatat')}</span>`;
+  const ctx = ev ? bi(ev.context, CONTEXT_ID[ev.context] || ev.context) + ' · ' + ev.time : bi(missing, missingId || missing);
+  return `<div class="cc-ev">
+      <div class="idx">${idx}</div>
+      <div style="flex:1">
+        <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap"><b>${bi(label, labelId)}</b>${st}</div>
+        <p>「${sentence}」<span class="idtx">${sentenceId}</span><br>${ctx}</p>
+      </div>
+    </div>`;
+}
+function renderCurtain(){
+  const p = pickEvidence();
+  el.ccEvidence.innerHTML =
+    evRow('一','听懂了一句真实的问话','Memahami pertanyaan yang nyata','你好！你是新搬来的吗？','Halo! Kamu yang baru pindah, ya?',
+      p.listen, '这一幕被跳过了，没有形成理解证据。','Babak ini dilewati, tidak ada bukti pemahaman.')
+  + evRow('二','用中文说出了自己的名字','Mengucapkan namamu dalam bahasa Mandarin','我叫 Emma。','Nama saya Emma.',
+      p.speak, '还没有开口的回合——下次可以先从关键词开始。','Belum ada babak berbicara — lain kali mulai dari kata kunci.')
+  + evRow('三','新人物、新问法下再说一次','Mengulang pada orang dan pertanyaan baru','我从 London 来。','Saya dari London.',
+      p.transfer, '迁移验证还没有发生，它会排进下一次复习。','Verifikasi transfer belum terjadi; akan masuk jadwal ulangan.');
+  el.ccReview.innerHTML = REVIEW_PLAN.map(r=>`<div class="cc-day"><b>${bi(r.day, r.dayId)}</b><span>${bi(r.desc, r.descId)}<br><span style="opacity:.5;font-size:10px;letter-spacing:.06em">${r.tag}</span></span></div>`).join('');
+  const t = p.transfer ? p.transfer.support : 'none';
+  $('ccTeacherLine').textContent = t==='independent'
+    ? '今天你已经能自己说出「我叫……，我从……来」。明天换一个地方，我还会在旁边。'
+    : t==='none'
+    ? '今天先到这里。下次我们从「我叫……」开始，我会先给关键词，再慢慢撤掉。'
+    : '今天的重点不是完美，是你真的把那句话说给了别人听。明天我会先给提示，再慢慢撤掉。';
+  $('ccTeacherLineId').textContent = t==='independent'
+    ? 'Hari ini kamu sudah bisa mengucapkan «wǒ jiào …, wǒ cóng … lái» sendiri. Besok ganti tempat, saya tetap di sampingmu.'
+    : t==='none'
+    ? 'Hari ini cukup. Lain kali kita mulai dari «wǒ jiào …»; saya beri kata kunci dulu, lalu dilepas pelan-pelan.'
+    : 'Yang penting bukan sempurna, tapi kamu benar-benar mengucapkannya kepada orang lain. Besok saya beri petunjuk dulu, lalu dilepas.';
+}
+function restartShow(){
+  state.evidence = []; state.visited = new Set(); state.log = [];
+  renderEvidence(); renderLog();
+  el.curtainCall.classList.remove('on');
+  state.started = true; state.playing = true; syncPlayButton();
+  startChapter(0); wakeChrome(true);
+  logEvent('编排器', 'session.start · 重开一集', '同一条故事线，支持级别重新开始记录。', 'var(--amber)');
+}
+
+/* ============================================================
+   9. 老师面板 / 模式切换 / 全屏 / 键位
+   ============================================================ */
+function teacherSpeak(text, textId){ el.teacherLine.textContent = text; el.teacherLineId.textContent = textId || ''; }
+function teacherHelp(kind){
+  const b = state.userBeat;
+  if (kind === 'slower'){
+    const line = (state.lastLine && state.lastLine.zh) ? state.lastLine : null;
+    if (line){ showLine(line, {slow:true}); teacherSpeak('我们慢慢再听一遍。注意每个字之间的停顿。', 'Kita dengarkan pelan-pelan lagi. Perhatikan jeda antar kata.'); toastBi('老师把这一句放慢了','Guru memperlambat kalimat ini'); }
+    else { teacherSpeak('现在是画面时间，没有台词需要放慢。', 'Sekarang bagian gambar, tidak ada dialog untuk diperlambat.'); }
+    logEvent('老师','放慢重说','支持第 2 级：语速变慢，内容不变。','var(--panda)');
+  } else if (kind === 'keyword'){
+    if (b && b.t === 'speak'){
+      el.apronTarget.className='apron-target on';
+      el.apronTarget.innerHTML = `<span class="reveal-txt">${b.keywords||'＿＿'}</span><small>只要说出这句就够了${b.idKeywords?'<span class="idtx">'+b.idKeywords+'</span>':''}</small>`;
+      const h = el.apronTarget.querySelector('.reveal-txt'); if (h) renderReveal(h, b.keywords||'', 46);
+      if (!state.support) state.support='keyword';
+      teacherSpeak('我只给你一个词，剩下的你自己说。', 'Saya beri satu kata saja, sisanya kamu yang bicara.');
+      toastBi('老师给了一个关键词','Guru memberi satu kata kunci');
+    }
+    else teacherSpeak('等轮到你说话的时候，我会给你一个关键词。', 'Nanti saat giliranmu bicara, saya beri satu kata kunci.');
+    logEvent('老师','给关键词','支持第 4 级：保留学生自己造句的空间。','var(--panda)');
+  } else if (kind === 'explain'){
+    const line = state.lastLine;
+    if (IDON()){
+      teacherSpeak('这句话的意思是——', (line && line.id) ? line.id : ((line && line.en) || 'Arahkan kursor ke aksara untuk melihat pinyin dan artinya.'));
+      if (line && line.id) toast(line.id, 4200);
+      logEvent('老师','用印尼语解释','支持第 5 级：显示印尼语解释，不改变剧情。','var(--panda)');
+    } else {
+      document.body.classList.remove('no-english'); setToggle(el.btnEnglish,true);
+      teacherSpeak(line && line.en ? '这句话的意思是：' + line.en : '你可以随时打开英文字幕，我会在这里解释。');
+      toast('英文字幕已打开 · 老师会解释这一句'); logEvent('老师','用英语解释','支持第 5 级：显示英语解释，不改变剧情。','var(--panda)');
+    }
+  } else if (kind === 'help'){
+    if (b && (b.t === 'speak' || b.t === 'choice')){
+      state.support = 'model';
+      el.apronTarget.className='apron-target on';
+      el.apronTarget.innerHTML = `${b.target || (b.options && b.options[0] ? b.options[0].zh : '')}<small>${b.targetPy||''}</small>`;
+      if (b.t === 'speak'){ const mb = tool(bi('跟着说一次','Ulangi sekali'), bi('Repeat','Ulang'), ()=>evaluateSpeak(b.target)); mb.classList.add('used'); }
+      teacherSpeak('我先说一遍，你跟着说就行。', 'Saya ucapkan dulu, kamu ikuti saja.'); toastBi('老师示范了这句话','Guru memberi contoh kalimat ini');
+    } else teacherSpeak('现在不用回答，先看故事。轮到你的时候我会提醒你。', 'Sekarang tidak perlu menjawab, nikmati ceritanya. Saya ingatkan saat giliranmu.');
+    logEvent('老师','我卡住了 · 老师接住','支持第 6 级：示范完整句，随后复述。','var(--panda)');
+  }
+}
+function setToggle(btn, on){ btn.setAttribute('aria-pressed', on); }
+function setMode(m){
+  if (m === state.mode) return;
+  state.mode = m;
+  document.body.dataset.mode = m;
+  el.modeTheater.setAttribute('aria-pressed', m==='theater');
+  el.modeClassic.setAttribute('aria-pressed', m==='classic');
+  el.chrome.classList.remove('is-dim');
+  clearTimeout(state.dimTimer);
+  if (m === 'classic'){
+    if (state.playing && state.started){ state.playing = false; syncPlayButton(); }
+    Sound.disable();
+    setTimeout(()=>{ if (!frameReady) el.classicFallback.classList.add('on'); }, 2400);
+    logEvent('评注','切到经典原型','右上角开关：经典版是原始 App 视图原型，同一份剧本的平面版本。','rgba(247,240,228,.6)');
+  } else {
+    el.classicFallback.classList.remove('on');
+    wakeChrome(true);
+    toast('回到剧院版 · 空格继续');
+  }
+}
+function toggleFull(){
+  const d = document;
+  if (!d.fullscreenElement){ (d.documentElement.requestFullscreen ? d.documentElement.requestFullscreen() : Promise.reject()).catch(()=>toast('这个浏览器拒绝了全屏请求')); }
+  else d.exitFullscreen?.();
+}
+function wakeChrome(keep){
+  el.chrome.classList.remove('is-dim');
+  document.body.classList.remove('idle');
+  clearTimeout(state.dimTimer);
+  if (keep || state.mode !== 'theater' || !state.playing || !state.started) return;
+  state.dimTimer = setTimeout(()=>{
+    if (state.playing && state.started && state.mode === 'theater'){
+      el.chrome.classList.add('is-dim');
+      document.body.classList.add('idle');
+    }
+  }, 3600);
+}
+function parallax(e){
+  if (state.mode !== 'theater' || !state.activeLayer) return;
+  const nx = (e.clientX / window.innerWidth - .5) * 2;
+  const ny = (e.clientY / window.innerHeight - .5) * 2;
+  state.activeLayer.style.transform = `translate3d(${(-nx*7).toFixed(1)}px, ${(-ny*5).toFixed(1)}px, 0)`;
+}
+function buildMotes(){
+  el.motes.innerHTML = '';
+  for (let i=0;i<16;i++){
+    const s = document.createElement('span'); s.className = 'mote';
+    const size = 1.4 + Math.random()*2.8;
+    s.style.left = (Math.random()*100).toFixed(1) + '%';
+    s.style.width = size + 'px'; s.style.height = size + 'px';
+    s.style.animationDuration = (14 + Math.random()*17).toFixed(1) + 's';
+    s.style.animationDelay = (-Math.random()*24).toFixed(1) + 's';
+    s.style.setProperty('--dx', (Math.random()*110-55).toFixed(0) + 'px');
+    el.motes.appendChild(s);
+  }
+}
+/* ---------------- 后台 · 排练室（零基础，可选可跳过 · 中/EN/ID 三语） ---------------- */
+const RB_TEXT = {
+  zh: {
+    kicker:'Backstage · 后台排练室',
+    title:'先让耳朵上线，再开演',
+    sub:'3 分钟小排练：声调耳朵 + 拼音直觉 + 第一句话。全程拼音、不用认汉字，随时可以跳过。',
+    skip:'跳过排练，直接开演 →',
+    prev:'← 上一步', next:'下一步 →', start:'开演 →',
+    s1label:'第 1 站 / 4 · 拼读站',
+    s1copy:'拼音不是另一门语言——它就是「读音的拼法」：声母 + 韵母 + 声调。点卡片听一遍，跟着读一遍。',
+    s1play:'拼起来听 ▶',
+    s1note:'试听为设备合成音，只示意声调走向（正式版为演员配音）。',
+    s1cards:'高频音节卡 · 本季会反复出现',
+    s1tone:'第三声：先降再升 ˇ',
+    cards:[['我','wǒ','我'],['叫','jiào','叫'],['来','lái','来'],['谢谢','xièxie','谢谢'],['再见','zàijiàn','再见']],
+    s2label:'第 2 站 / 4 · 闻声站',
+    s2copy:'先别看汉字——用耳朵选：听到的是 <b style="color:var(--amber)">mā</b>（妈 · 第一声，高平）还是 <b style="color:var(--amber)">mǎ</b>（马 · 第三声，先降再升）？',
+    s2replay:'再听一次 ▶',
+    t1:'第一声 · 高平', t3:'第三声 · 先降再升',
+    s2hint:'听——然后点一个。',
+    s2ok:'✓ 对，就是这个调。',
+    s2no:'↻ 再听一次：是平的，还是先降后升？',
+    s2done:'🎧 耳朵上线了 · 你听出了 ',
+    s2next:'可以进入下一站了 →',
+    round:'第 ', of:' / 4 轮',
+    s3label:'第 3 站 / 4 · 首句站',
+    s3copy:'你的第一句中文。熊猫老师先说一遍，你跟着说一遍就行——说不出来也没关系。',
+    s3say:'让老师读一遍 ▶',
+    s3try:'按住说一遍（模拟）',
+    s3rec:'正在收音…（模拟）',
+    s3again:'再按住说一遍（模拟）',
+    s3ok:'✓ 收到，你的第一句中文。能开口，就已经赢了一半。',
+    s3mean:'Hello · 你好',
+    s4label:'第 4 站 / 4 · 后台须知',
+    rules:[['点舞台','继续下一句；空格可以暂停 / 继续。'],['按住说话','轮到你说的时候，按住下方麦克风（模拟识别；正式版为真实语音）。'],['听不懂？','「今天先只听」也是正路。左侧可回看幕目录，右上角「拼 / 字 / En / ID」随时切换字幕。']],
+    noTTS:'这台设备没有中文合成音，先看拼音与声调示意',
+    skipToast:'已跳过排练 · 随时可以按 H 打开汉字',
+    doneToast:'🎧 耳朵已上线 · 开演'
+  },
+  en: {
+    kicker:'Backstage · Rehearsal Room',
+    title:'Warm up your ears before the show',
+    sub:'A 3-minute warm-up: tone ears + pinyin intuition + your first sentence. All pinyin, no characters — skip anytime.',
+    skip:'Skip rehearsal, start the show →',
+    prev:'← Back', next:'Next →', start:'Start the show →',
+    s1label:'Station 1 / 4 · Pinyin',
+    s1copy:'Pinyin is not another language — it is how the sound is spelled: initial + final + tone. Tap a card, listen once, say it once.',
+    s1play:'Hear it together ▶',
+    s1note:'Audio uses device speech synthesis, only to suggest the tone shape (the full version uses actor voices).',
+    s1cards:'High-frequency syllable cards · they return all season',
+    s1tone:'tone 3: falls then rises ˇ',
+    cards:[['我','wǒ','I / me'],['叫','jiào','to be called'],['来','lái','to come'],['谢谢','xièxie','thanks'],['再见','zàijiàn','goodbye']],
+    s2label:'Station 2 / 4 · Ears',
+    s2copy:'No characters yet — use your ears: is it <b style="color:var(--amber)">mā</b> (妈 · tone 1, high &amp; flat) or <b style="color:var(--amber)">mǎ</b> (马 · tone 3, falls then rises)?',
+    s2replay:'Play again ▶',
+    t1:'Tone 1 · high &amp; flat', t3:'Tone 3 · falls then rises',
+    s2hint:'Listen — then tap one.',
+    s2ok:'✓ Yes — that is the tone.',
+    s2no:'↻ Listen again: flat, or falling-rising?',
+    s2done:'🎧 Ears online · you caught ',
+    s2next:'Ready for the next station →',
+    round:'Round ', of:' / 4',
+    s3label:'Station 3 / 4 · First sentence',
+    s3copy:'Your first sentence in Chinese. The panda teacher says it once — you say it after. No pressure if it is hard.',
+    s3say:'Let the teacher say it ▶',
+    s3try:'Hold and say it (simulated)',
+    s3rec:'Recording… (simulated)',
+    s3again:'Hold and say it again (simulated)',
+    s3ok:'✓ Got it — your first Chinese sentence. Speaking at all is half the win.',
+    s3mean:'Hello · 你好',
+    s4label:'Station 4 / 4 · House rules',
+    rules:[['Tap the stage','Go to the next line; Space pauses / resumes.'],['Hold to speak','When it is your turn, hold the mic below (simulated ASR; real voice in the full version).'],['Lost?','Watching only is a real path. The left rail replays acts; 拼 / 字 / En / ID switch subtitles anytime.']],
+    noTTS:'No Chinese speech on this device — follow the pinyin and tone shapes',
+    skipToast:'Rehearsal skipped · press H anytime to show characters',
+    doneToast:'🎧 Ears online · let the show begin'
+  },
+  id: {
+    kicker:'Backstage · Ruang Latihan',
+    title:'Latih telingamu dulu, baru mulai',
+    sub:'Latihan 3 menit: telinga nada + intuisi pinyin + kalimat pertama. Semua pinyin, tanpa aksara — bisa dilewati kapan saja.',
+    skip:'Lewati latihan, mulai pertunjukan →',
+    prev:'← Kembali', next:'Lanjut →', start:'Mulai pertunjukan →',
+    s1label:'Stasiun 1 / 4 · Pinyin',
+    s1copy:'Pinyin bukan bahasa lain — itu cara menuliskan bunyi: awal + akhir + nada. Ketuk kartu, dengar sekali, ucapkan sekali.',
+    s1play:'Dengarkan gabungannya ▶',
+    s1note:'Audio memakai suara sintetis perangkat, hanya untuk arah nada (versi penuh memakai suara aktor).',
+    s1cards:'Kartu suku kata frekuensi tinggi · muncul sepanjang musim',
+    s1tone:'nada 3: turun lalu naik ˇ',
+    cards:[['我','wǒ','saya'],['叫','jiào','bernama'],['来','lái','datang'],['谢谢','xièxie','terima kasih'],['再见','zàijiàn','selamat tinggal']],
+    s2label:'Stasiun 2 / 4 · Telinga',
+    s2copy:'Belum perlu aksara — pakai telinga: yang kamu dengar <b style="color:var(--amber)">mā</b> (妈 · nada 1, datar tinggi) atau <b style="color:var(--amber)">mǎ</b> (马 · nada 3, turun lalu naik)?',
+    s2replay:'Putar lagi ▶',
+    t1:'Nada 1 · datar tinggi', t3:'Nada 3 · turun lalu naik',
+    s2hint:'Dengarkan — lalu ketuk satu.',
+    s2ok:'✓ Ya, itu nadanya.',
+    s2no:'↻ Dengar lagi: datar, atau turun-naik?',
+    s2done:'🎧 Telinga siap · kamu menangkap ',
+    s2next:'Lanjut ke stasiun berikutnya →',
+    round:'Ronde ', of:' / 4',
+    s3label:'Stasiun 3 / 4 · Kalimat pertama',
+    s3copy:'Kalimat pertamamu dalam bahasa Mandarin. Guru Panda mengucapkan sekali — kamu ikuti. Tidak apa-apa kalau sulit.',
+    s3say:'Minta guru membacanya ▶',
+    s3try:'Tekan &amp; ucapkan (simulasi)',
+    s3rec:'Merekam… (simulasi)',
+    s3again:'Tekan &amp; ucapkan lagi (simulasi)',
+    s3ok:'✓ Diterima — kalimat Mandarin pertamamu. Berani bicara itu sudah separuh menang.',
+    s3mean:'Hello · 你好',
+    s4label:'Stasiun 4 / 4 · Aturan panggung',
+    rules:[['Ketuk panggung','Lanjut ke kalimat berikutnya; Spasi untuk jeda / lanjut.'],['Tekan &amp; bicara','Saat giliranmu, tekan mikrofon di bawah (ASR simulasi; versi penuh suara asli).'],['Belum paham?','Menyimak saja itu jalur sah. Rel kiri mengulang babak; 拼 / 字 / En / ID mengganti subtitle kapan saja.']],
+    noTTS:'Perangkat ini tidak punya suara Mandarin — ikuti pinyin dan bentuk nadanya',
+    skipToast:'Latihan dilewati · tekan H kapan saja untuk menampilkan aksara',
+    doneToast:'🎧 Telinga siap · mulai pertunjukan'
+  }
+};
+const RB_TONES = {
+  c1:'<svg class="curve" viewBox="0 0 46 18" aria-hidden="true"><path d="M4 9 H42"/></svg>',
+  c3:'<svg class="curve" viewBox="0 0 46 18" aria-hidden="true"><path d="M4 5 C14 16 24 16 42 6"/></svg>'
+};
+let rbIndex = 0, rbQuiz = null;
+let rbLang = LS.get('ht.rbLang') || 'en';
+const rbL = () => RB_TEXT[rbLang] || RB_TEXT.en;
+const REHEARSAL_STATIONS = [
+  { render: rbRenderPinyin },
+  { render: rbRenderEars },
+  { render: rbRenderFirstLine },
+  { render: rbRenderRules }
+];
+function openRehearsal(){
+  rbIndex = 0; rbQuiz = null;
+  rbRender();
+  el.rehearsal.classList.add('on');
+  logEvent('编排器', '进入后台排练室', '零基础可选阶段：声调耳朵 + 拼读直觉 + 第一句话；全程拼音、不用认汉字，随时可跳过。支持 中/EN/ID 三语。', 'var(--amber)');
+}
+function rbRender(){
+  const L = rbL();
+  el.rbKicker.textContent = L.kicker;
+  el.rbTitle.textContent = L.title;
+  el.rbSub.textContent = L.sub;
+  $('rbSkip').textContent = L.skip;
+  el.rbPrev.textContent = L.prev;
+  el.rbNext.textContent = rbIndex === REHEARSAL_STATIONS.length - 1 ? L.start : L.next;
+  el.rbDots.innerHTML = REHEARSAL_STATIONS.map((_,i)=>`<i class="${i===rbIndex?'on':(i<rbIndex?'done':'')}"></i>`).join('');
+  el.rbLang.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.lang === rbLang)));
+  REHEARSAL_STATIONS[rbIndex].render();
+}
+function rbNextStation(){ if (rbIndex >= REHEARSAL_STATIONS.length - 1) rbFinish(false); else { rbIndex++; rbRender(); } }
+function rbPrevStation(){ if (rbIndex > 0){ rbIndex--; rbRender(); } }
+function rbFinish(skipped){
+  const L = rbL();
+  el.rehearsal.classList.remove('on');
+  state.warmupDone = true;
+  LS.set('ht.warmup', '1');
+  if (skipped){
+    toast(L.skipToast, 3200);
+    logEvent('编排器', '跳过排练', '学习者选择直接开演；排练只记准备状态，不影响证据。', 'rgba(247,240,228,.55)');
+  } else {
+    toast(L.doneToast, 3200);
+    logEvent('编排器', '排练完成', '完成零基础排练：声调耳朵、拼读直觉、第一句话。不写掌握证据，只记准备状态。', 'var(--jade)');
+  }
+  startShow(true);
+}
+function rbBindSay(root){
+  root.querySelectorAll('[data-say]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      Sound.tick();
+      const said = TTS.speak(b.dataset.say, 0.72);
+      b.classList.add('played');
+      if (!said) toast(rbL().noTTS, 3200);
+    });
+  });
+}
+function rbRenderPinyin(){
+  const L = rbL();
+  el.rbBody.innerHTML = `
+    <div class="rb-label">${L.s1label}</div>
+    <p class="rb-copy">${L.s1copy}</p>
+    <div class="rb-hero">
+      <button class="rb-syl" data-say="你"><span class="rb-py">nǐ</span><span class="rb-tone">n + ǐ · ${L.s1tone}</span></button>
+      <span class="rb-plus">+</span>
+      <button class="rb-syl" data-say="好"><span class="rb-py">hǎo</span><span class="rb-tone">h + ǎo · ${L.s1tone}</span></button>
+      <span class="rb-eq">=</span>
+      <button class="rb-play" data-say="你好"><span class="rb-py">nǐ hǎo</span><span>${L.s1play}</span></button>
+    </div>
+    <p class="rb-note">${L.s1note}</p>
+    <div class="rb-label" style="margin-top:20px">${L.s1cards}</div>
+    <div class="rb-cards">
+      ${L.cards.map(c=>`<button class="rb-card-btn" data-say="${c[0]}">${c[1]}<span>${c[0]} · ${c[2]}</span></button>`).join('')}
+    </div>`;
+  rbBindSay(el.rbBody);
+}
+function rbRenderEars(){
+  const L = rbL();
+  rbQuiz = rbQuiz || { round:0, total:4, score:0, order:['妈','马','妈','马'].sort(()=>Math.random()-0.5), cur:null };
+  el.rbBody.innerHTML = `
+    <div class="rb-label">${L.s2label}</div>
+    <p class="rb-copy">${L.s2copy}</p>
+    <div class="rb-quiz">
+      <div class="rb-chips">
+        <button class="btn-ghost" id="rbReplay">${L.s2replay}</button>
+      </div>
+      <div class="rb-answer">
+        <button class="rb-tone-btn" id="rbTone1">${RB_TONES.c1}<b>mā</b><span>${L.t1}</span></button>
+        <button class="rb-tone-btn" id="rbTone3">${RB_TONES.c3}<b>mǎ</b><span>${L.t3}</span></button>
+      </div>
+      <div class="rb-fb" id="rbQuizFb"></div>
+      <div class="rb-progress" id="rbQuizProg"></div>
+    </div>`;
+  $('rbReplay').addEventListener('click', ()=>{ if (rbQuiz && rbQuiz.cur && !TTS.speak(rbQuiz.cur, 0.6)) toast(rbL().noTTS, 3200); });
+  rbQuizNext();
+}
+function rbQuizNext(){
+  const L = rbL();
+  const fb = document.getElementById('rbQuizFb'), prog = document.getElementById('rbQuizProg');
+  if (!fb || !prog) return;
+  if (rbQuiz.round >= rbQuiz.total){
+    fb.classList.remove('warn');
+    fb.textContent = L.s2done + rbQuiz.score + '/' + rbQuiz.total;
+    prog.textContent = L.s2next;
+    document.getElementById('rbTone1').disabled = true;
+    document.getElementById('rbTone3').disabled = true;
+    return;
+  }
+  rbQuiz.cur = rbQuiz.order[rbQuiz.round];
+  prog.textContent = L.round + (rbQuiz.round + 1) + L.of;
+  fb.classList.remove('warn');
+  fb.textContent = L.s2hint;
+  setTimeout(()=>{ if (rbQuiz && rbQuiz.cur) TTS.speak(rbQuiz.cur, 0.6); }, 380);
+  document.getElementById('rbTone1').onclick = ()=>rbQuizAnswer(1);
+  document.getElementById('rbTone3').onclick = ()=>rbQuizAnswer(3);
+}
+function rbQuizAnswer(tone){
+  if (!rbQuiz || !rbQuiz.cur) return;
+  const L = rbL();
+  const want = rbQuiz.cur === '妈' ? 1 : 3;
+  const fb = document.getElementById('rbQuizFb');
+  const btn = document.getElementById(tone === 1 ? 'rbTone1' : 'rbTone3');
+  if (tone === want){
+    rbQuiz.score++; rbQuiz.round++;
+    btn.classList.add('correct');
+    fb.classList.remove('warn');
+    fb.textContent = L.s2ok;
+    setTimeout(()=>{ btn.classList.remove('correct'); if (document.getElementById('rbQuizFb')) rbQuizNext(); }, 900);
+  } else {
+    btn.classList.add('wrong');
+    fb.classList.add('warn');
+    fb.textContent = L.s2no;
+    setTimeout(()=>{ btn.classList.remove('wrong'); if (rbQuiz && rbQuiz.cur) TTS.speak(rbQuiz.cur, 0.55); }, 650);
+  }
+}
+function rbRenderFirstLine(){
+  const L = rbL();
+  el.rbBody.innerHTML = `
+    <div class="rb-label">${L.s3label}</div>
+    <p class="rb-copy">${L.s3copy}</p>
+    <div class="rb-hero">
+      <img class="rb-panda" src="assets/panda-teacher-v2.jpg" alt="Panda teacher" />
+      <div>
+        <div class="rb-py big">nǐ hǎo</div>
+        <div class="rb-meaning">${L.s3mean}</div>
+        <div class="rb-chips">
+          <button class="btn-ghost" id="rbSayHi">${L.s3say}</button>
+          <button class="btn-primary" id="rbTryHi">${L.s3try}</button>
+        </div>
+        <div class="rb-fb" id="rbHiFb"></div>
+      </div>
+    </div>`;
+  $('rbSayHi').addEventListener('click', ()=>{ Sound.tick(); if (!TTS.speak('你好', 0.7)) toast(rbL().noTTS, 3200); });
+  $('rbTryHi').addEventListener('click', (e)=>{
+    const btn = e.currentTarget; btn.disabled = true; btn.textContent = rbL().s3rec;
+    setTimeout(()=>{
+      if (document.getElementById('rbHiFb')){
+        btn.disabled = false; btn.textContent = rbL().s3again;
+        $('rbHiFb').textContent = rbL().s3ok;
+      }
+    }, 1200);
+  });
+}
+function rbRenderRules(){
+  const L = rbL();
+  el.rbBody.innerHTML = `
+    <div class="rb-label">${L.s4label}</div>
+    <div class="rb-rules">
+      ${L.rules.map(r=>`<div class="rb-rule"><b>${r[0]}</b><span>${r[1]}</span></div>`).join('')}
+    </div>`;
+}
+
+function startShow(fromUser){
+  el.rehearsal.classList.remove('on');
+  el.overture.classList.add('open');
+  setTimeout(()=>el.overture.classList.add('hide'), 1600);
+  state.started = true; state.playing = true; syncPlayButton();
+  startChapter(0);
+  wakeChrome(true);
+  if (fromUser && state.sound) Sound.enable();
+}
+
+/* ---------------- 印尼语辅助开关 ---------------- */
+function setIdMode(on){
+  document.body.classList.toggle('no-indo', !on);
+  el.btnId.setAttribute('aria-pressed', on);
+  syncApronOffset();
+  if (on){
+    toast('Bantuan Indonesia aktif · 把鼠标停在汉字上看拼音与 arti', 4200);
+    logEvent('老师','开启印尼语辅助','学习者界面切换为「中文 + 拼音 + 印尼语」；汉字悬停显示拼音与释义。','var(--jade)');
+  } else {
+    toast('印尼语辅助已关闭 · Bantuan Indonesia nonaktif');
+  }
+}
+
+/* ---------------- 绑定 ---------------- */
+function bind(){
+  $('btnStart').addEventListener('click', ()=>{
+    if (!state.warmupDone) openRehearsal(); else startShow(true);
+  });
+  $('btnWarmup').addEventListener('click', ()=>{
+    if (state.warmupDone){ openRehearsal(); }
+    else { state.warmupDone = true; LS.set('ht.warmup', '1'); toast('跳过排练 · 随时可以按 H 打开汉字', 3200); startShow(true); }
+  });
+  el.rbPrev.addEventListener('click', rbPrevStation);
+  el.rbNext.addEventListener('click', rbNextStation);
+  el.rbLang.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
+    rbLang = b.dataset.lang; LS.set('ht.rbLang', rbLang);
+    Sound.tick(); rbRender();
+  }));
+  $('rbSkip').addEventListener('click', ()=>rbFinish(true));
+  $('ccOpenHanzi').addEventListener('click', ()=>{
+    applyTextPreset('default');
+    el.ccInvite.hidden = true;
+    toast('汉字层已打开——拼音还在，随时可以关', 3400);
+  });
+  $('ccKeepPinyin').addEventListener('click', ()=>{ el.ccInvite.hidden = true; toast('好的，继续用拼音 · 右上角「字」随时可开', 3200); });
+  $('btnJumpClassic').addEventListener('click', ()=>{ el.overture.classList.add('open','hide'); setMode('classic'); });
+  $('btnAgain').addEventListener('click', restartShow);
+  $('btnRetryTransfer').addEventListener('click', ()=>{
+    el.curtainCall.classList.remove('on');
+    state.started = true; state.playing = true; syncPlayButton();
+    chapterTransition(CHAPTERS.findIndex(c=>c.id==='act3'));
+  });
+  $('btnOpenDirector2').addEventListener('click', ()=>{ el.curtainCall.classList.remove('on'); state.started = true; openDirector(true); });
+  $('btnSeeClassic').addEventListener('click', ()=>{ el.curtainCall.classList.remove('on'); setMode('classic'); });
+
+  el.modeTheater.addEventListener('click', ()=>setMode('theater'));
+  el.modeClassic.addEventListener('click', ()=>setMode('classic'));
+  el.btnPlay.addEventListener('click', togglePlay);
+  $('btnReplay').addEventListener('click', replayChapter);
+  $('btnSkip').addEventListener('click', ()=>{
+    if (state.userBeat){
+      const b = state.userBeat;
+      if (b.t === 'choice'){ state.pendingResult = b.options[1].result; logEvent('评审','跳过用户回合','按中间分支继续，不改写证据。','rgba(247,240,228,.5)'); }
+      else if (b.result){ state.pendingResult = b.result; }
+      advanceFromUser();
+    } else nextBeat();
+  });
+  el.btnDirector.addEventListener('click', ()=>openDirector());
+  $('btnDirectorClose').addEventListener('click', ()=>openDirector(false));
+  el.btnSound.addEventListener('click', ()=>{
+    state.sound = !state.sound; setToggle(el.btnSound, state.sound);
+    if (state.sound){ if (!Sound.enable()) state.sound = false; else toast('环境音已开启 · 全部由 WebAudio 实时生成，没有音频文件'); }
+    else { Sound.disable(); toast('环境音已关闭'); }
+  });
+  el.btnPinyin.addEventListener('click', ()=>{
+    const off = document.body.classList.toggle('no-pinyin');
+    setToggle(el.btnPinyin, !off);
+    state.textPreset = 'custom'; LS.set('ht.preset', 'custom'); persistLayers();
+    if (off && ZERO()){
+      // 拼音关掉时若汉字也藏着，正文会一个字都没有——自动打开汉字
+      setHanzi(true);
+      toast('拼音关了，已自动打开汉字：现在是「汉字 + 译文」', 3800);
+    } else if (!off && ZERO()){
+      toast('拼音已关——但零基础档建议保留拼音，按「拼」可以再打开', 3600);
+    }
+    if (state.beats) renderDecision(CHAPTERS[state.chapter]);
+  });
+  el.btnHanzi.addEventListener('click', ()=>{
+    const enable = ZERO(); // 正在全拼音 → 点「字」打开汉字
+    setHanzi(enable);
+    state.textPreset = enable ? 'default' : 'custom';
+    LS.set('ht.preset', state.textPreset);
+    if (state.beats) renderDecision(CHAPTERS[state.chapter]);
+    toast(enable ? '汉字层已打开：现在是「汉字 + 拼音」' : '汉字层已关闭：回到全拼音 · 去汉字', 3200);
+    logEvent('老师', enable ? '手动打开汉字层' : '关闭汉字层',
+      enable ? '学习者主动升级字幕：正文变为汉字 + 拼音。' : '回到零基础档：全拼音、去汉字，译文常显。', 'var(--panda)');
+  });
+  el.btnEnglish.addEventListener('click', ()=>{
+    const off = document.body.classList.toggle('no-english');
+    setToggle(el.btnEnglish, !off);
+  });
+  el.btnFull.addEventListener('click', toggleFull);
+  el.btnId.addEventListener('click', ()=>setIdMode(document.body.classList.contains('no-indo')));
+  [el.subsZh, el.narrZh, el.apron].forEach(bindGlyphTap);
+  document.addEventListener('fullscreenchange', ()=>setToggle(el.btnFull, !!document.fullscreenElement));
+
+  // 麦克风（原型模拟）
+  const mic = el.micBtn;
+  mic.addEventListener('pointerdown', (e)=>{ e.preventDefault(); startRec(); try{ mic.setPointerCapture(e.pointerId); }catch(_){} });
+  mic.addEventListener('pointerup', (e)=>{ e.preventDefault(); stopRec(false); });
+  mic.addEventListener('pointercancel', ()=>stopRec(false));
+  mic.addEventListener('contextmenu', (e)=>e.preventDefault());
+  mic.addEventListener('click', ()=>{
+    if (performance.now() - (state.lastRecEnd||0) < 700) return;
+    startRec(); setTimeout(()=>stopRec(true), 1500);
+  });
+
+  // 老师悬浮球
+  $('teacherOrb').addEventListener('click', ()=>{
+    const on = el.teacherSheet.classList.toggle('on');
+    if (on){ Sound.tick(); teacherSpeak(state.userBeat ? '轮到你了。要我给一个关键词，还是先示范一遍？' : '我在旁边。需要的话，我可以把刚才那句放慢。', state.userBeat ? 'Giliranmu. Mau saya beri kata kunci, atau saya beri contoh dulu?' : 'Saya di sampingmu. Kalau perlu, saya bisa memperlambat kalimat tadi.'); }
+    syncApronOffset();
+  });
+  el.teacherSheet.querySelectorAll('[data-help]').forEach(b=>b.addEventListener('click', ()=>{ Sound.tick(); teacherHelp(b.dataset.help); }));
+
+  // 舞台点击推进
+  el.theater.addEventListener('click', (e)=>{
+    if (e.target.closest('.apron, .transport, .teacher-orb, .teacher-sheet, .act-rail, .director, .curtain-call, .overture, .circle-bar, .rehearsal')) return;
+    if (state.userBeat) return;
+    nextBeat();
+  });
+  // 指针视差 + chrome 唤醒
+  window.addEventListener('mousemove', (e)=>{ wakeChrome(); parallax(e); });
+  window.addEventListener('resize', syncApronOffset);
+  el.chrome.addEventListener('mouseenter', ()=>{ clearTimeout(state.dimTimer); el.chrome.classList.remove('is-dim'); document.body.classList.remove('idle'); });
+  el.chrome.addEventListener('mouseleave', ()=>wakeChrome());
+  window.addEventListener('touchstart', ()=>{ if (Sound.ctx && Sound.on && Sound.ctx.state === 'suspended') Sound.ctx.resume(); }, {passive:true});
+
+  // 键位
+  window.addEventListener('keydown', (e)=>{
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    const k = e.key.toLowerCase();
+    if (k === ' ' || e.code === 'Space'){ e.preventDefault(); togglePlay(); }
+    else if (k === 'arrowright'){ if (!state.userBeat) nextBeat(); }
+    else if (k === 'r'){ replayChapter(); }
+    else if (k === 'd'){ openDirector(); }
+    else if (k === 'f'){ toggleFull(); }
+    else if (k === 'i'){ setIdMode(document.body.classList.contains('no-indo')); }
+    else if (k === 'h'){ el.btnHanzi.click(); }
+    else if (k === 'escape'){ openDirector(false); el.teacherSheet.classList.remove('on'); }
+    else if (/^[1-6]$/.test(k)){ const i = Number(k)-1; if (CHAPTERS[i]) jumpChapter(i); }
+  });
+}
+
+let frameReady = false;
+el.classicFrame.addEventListener('load', ()=>{ frameReady = true; el.classicFallback.classList.remove('on'); });
+
+/* ---------------- 初始化 ---------------- */
+/* 各幕氛围大图（按文件名引用，不做内嵌 / 转码）：
+   序章.png → 序章；第一幕.png → 第一幕 · 第二幕（同一楼道）；
+   幕间.png → 幕间；第三幕.png → 第三幕；第四幕.png → 第四幕 · 谢幕。
+   开场后错峰预热，幕与幕之间的建立镜头不再等图。 */
+const BACKDROPS = ['序章','第一幕','幕间','第三幕','第四幕'].map(n => 'assets/' + n + '.png');
+const backdropCache = [];
+function warmBackdrops(){
+  BACKDROPS.forEach((src, i) => {
+    const im = new Image();
+    im.decoding = 'async';
+    backdropCache.push(im);
+    setTimeout(() => { im.src = src; }, 700 + i * 600);
+  });
+}
+function init(){
+  state.warmupDone = LS.get('ht.warmup', '0') === '1';
+  state.episodeCount = parseInt(LS.get('ht.episodes', '0'), 10) || 0;
+  const savedPreset = LS.get('ht.preset');
+  if (savedPreset === 'custom'){
+    state.textPreset = 'custom';
+    document.body.classList.toggle('no-hanzi', LS.get('ht.noHanzi', '0') === '1');
+    document.body.classList.toggle('no-pinyin', LS.get('ht.noPinyin', '0') === '1');
+    setToggle(el.btnHanzi, !document.body.classList.contains('no-hanzi'));
+    setToggle(el.btnPinyin, !document.body.classList.contains('no-pinyin'));
+  } else {
+    applyTextPreset(savedPreset === 'default' ? 'default' : 'zero');
+  }
+  const warmNote = $('oWarmupNote');
+  if (state.warmupDone){
+    warmNote.hidden = true;
+    $('btnWarmup').innerHTML = '<span class="bizh">再进后台练一遍</span><span class="biid">Masuk ruang latihan lagi</span>';
+  } else {
+    warmNote.hidden = false;
+  }
+  buildMotes();
+  renderIntent(CHAPTERS[0]); renderDecision(CHAPTERS[0]);
+  renderLog(); renderEvidence(); renderRail();
+  setScene(CHAPTERS[0].sceneWide || CHAPTERS[0].scene, 14000);
+  warmBackdrops();
+  updateProgress(); syncPlayButton();
+  el.layerA.style.transition = 'opacity 1.25s cubic-bezier(.6,.02,.2,1), transform .9s ease-out';
+  el.layerB.style.transition = 'opacity 1.25s cubic-bezier(.6,.02,.2,1), transform .9s ease-out';
+  bind();
+  state.log = [];
+  logEvent('编排器', 'session.start · 第一集「新邻居」', '目标：问候、介绍自己、说明来自哪里。', 'var(--amber)');
+  logEvent('导演', '世界状态读取', '今日事件：海棠街准备邻里夜市；新邻居刚搬来。', 'var(--amber)');
+  logEvent('老师', state.textPreset === 'zero' ? '字幕档：零基础（全拼音 · 去汉字）' : '字幕档：汉字 + 拼音',
+    state.warmupDone ? '排练已完成或已跳过；按 H 或右上角「字」随时切换字幕。' : '新用户默认先进后台排练室（3 分钟，随时可跳过）。', 'var(--panda)');
+}
+init();
+try{
+  if (new URLSearchParams(location.search).get('from') === 'mobile'){
+    const home = 'mobile.html?frame=1';
+    const back = document.getElementById('btnBackHome');
+    if (back) back.href = home;
+    const chromeBack = document.querySelector('.chrome-link.back-home');
+    if (chromeBack){ chromeBack.href = home; chromeBack.textContent = '← 回移动端首页'; }
+  }
+}catch(_){}
+</script>
+</body>
+</html>
